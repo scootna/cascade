@@ -1,6 +1,6 @@
 const state = {
-  cols: 6,
-  rows: 6,
+  cols: 4,
+  rows: 4,
   viewMode: "arrows",
   hideBaseAndMatchedCurrent: true,
   showCurrentValueBadge: false,
