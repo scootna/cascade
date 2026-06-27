@@ -261,6 +261,20 @@ button {
   animation: solved-stage-glow 720ms ease-out;
 }
 
+.post-win-actions {
+  display: none;
+  justify-content: center;
+  margin-top: 0.35rem;
+}
+
+.post-win-actions.visible {
+  display: flex;
+}
+
+#postWinNewGameBtn {
+  min-width: 180px;
+}
+
 @keyframes solved-stage-glow {
   0% {
     filter: drop-shadow(0 0 0 rgba(30, 139, 102, 0));
@@ -624,5 +638,9 @@ button {
 
   .board {
     gap: 0.35rem;
+  }
+
+  #postWinNewGameBtn {
+    width: min(320px, 92vw);
   }
 }

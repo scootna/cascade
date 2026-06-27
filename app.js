@@ -34,6 +34,8 @@ const settingsModalEl = document.getElementById("settingsModal");
 const statusTextEl = document.getElementById("statusText");
 const movesTextEl = document.getElementById("movesText");
 const newGameBtn = document.getElementById("newGameBtn");
+const postWinActionsEl = document.getElementById("postWinActions");
+const postWinNewGameBtn = document.getElementById("postWinNewGameBtn");
 const rotationDirectionToggleBtn = document.getElementById("rotationDirectionToggleBtn");
 const valueBadgeToggleBtn = document.getElementById("valueBadgeToggleBtn");
 const numberModeToggleBtn = document.getElementById("numberModeToggleBtn");
@@ -611,6 +613,13 @@ newGameBtn.addEventListener("click", () => {
   const grid = parseGridValue(sizeSelect.value);
   startNewPuzzle(grid.cols, grid.rows);
 });
+
+if (postWinNewGameBtn) {
+  postWinNewGameBtn.addEventListener("click", () => {
+    const grid = parseGridValue(sizeSelect.value);
+    startNewPuzzle(grid.cols, grid.rows);
+  });
+}
 
 sizeSelect.addEventListener("change", () => {
   const grid = parseGridValue(sizeSelect.value);
@@ -1306,6 +1315,10 @@ function updateStatus() {
   const wasSolved = state.solved;
   const solvedNow = isSolved();
   state.solved = solvedNow;
+
+  if (postWinActionsEl) {
+    postWinActionsEl.classList.toggle("visible", solvedNow);
+  }
 
   if (solvedNow && !wasSolved) {
     triggerSolvedCelebration();
