@@ -1,0 +1,212 @@
+:root {
+  --bg-a: #d6e6f2;
+  --bg-b: #f5f0e5;
+  --panel: #fffaf2;
+  --ink: #1f2a30;
+  --accent: #2f7d6b;
+  --accent-soft: #8ec7b9;
+  --warn: #d96f45;
+  --tile: #fff;
+  --tile-border: #c6d6df;
+  --solved: #dbf1e4;
+  --unsolved: #fde9de;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at 15% 20%, #fef8ef 0%, transparent 40%),
+              radial-gradient(circle at 80% 10%, #d5ecf5 0%, transparent 35%),
+              linear-gradient(160deg, var(--bg-a), var(--bg-b));
+}
+
+.app-shell {
+  width: min(1080px, 94vw);
+  margin: 1.5rem auto 2rem;
+  padding: 1rem;
+  border: 1px solid #b8cad5;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--panel) 88%, white 12%);
+  box-shadow: 0 16px 45px rgba(24, 52, 73, 0.15);
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.1vw, 2.1rem);
+  letter-spacing: 0.01em;
+}
+
+.topbar p {
+  margin: 0.35rem 0 0;
+  max-width: 55ch;
+}
+
+.controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+
+.controls label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+select,
+button {
+  border: 1px solid #94b2bf;
+  border-radius: 10px;
+  padding: 0.45rem 0.7rem;
+  background: #ffffff;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+button {
+  cursor: pointer;
+  background: linear-gradient(180deg, #2f8f7a, #2f7d6b);
+  color: white;
+  border-color: #2b6f60;
+  font-weight: 700;
+}
+
+.legend,
+.status-row,
+.help-panel {
+  margin-top: 0.9rem;
+  border: 1px solid #c8d8df;
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.65rem 0.85rem;
+}
+
+.legend,
+.status-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.dot {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  margin-right: 0.35rem;
+  border: 1px solid #9aa8b5;
+}
+
+.dot-solved {
+  background: var(--solved);
+}
+
+.dot-unsolved {
+  background: var(--unsolved);
+}
+
+.board {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.tile {
+  position: relative;
+  min-height: 78px;
+  border-radius: 12px;
+  border: 1px solid var(--tile-border);
+  background: var(--tile);
+  transition: transform 120ms ease, background-color 150ms ease;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.tile:hover {
+  transform: translateY(-1px);
+}
+
+.tile.solved {
+  background: var(--solved);
+}
+
+.tile.unsolved {
+  background: var(--unsolved);
+}
+
+.base,
+.target,
+.current,
+.arrow {
+  position: absolute;
+}
+
+.base {
+  top: 0.28rem;
+  left: 0.4rem;
+  font-size: 0.8rem;
+  color: #476273;
+}
+
+.target {
+  bottom: 0.22rem;
+  right: 0.4rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #2a5168;
+}
+
+.current {
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.23rem;
+  font-weight: 800;
+  color: #143446;
+}
+
+.arrow {
+  top: 0.15rem;
+  right: 0.35rem;
+  font-size: 0.9rem;
+  color: #355c71;
+}
+
+.help-panel h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+}
+
+.help-panel p {
+  margin: 0.3rem 0;
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    flex-direction: column;
+  }
+
+  .controls {
+    width: 100%;
+  }
+
+  .controls label,
+  .controls button,
+  .controls select {
+    flex: 1;
+  }
+}

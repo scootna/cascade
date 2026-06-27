@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TauDEM Flow Puzzle (Web)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1>Flow Accumulation Puzzle</h1>
+        <p>Rotate tiles to route runoff so every tile matches its target accumulation.</p>
+      </div>
+      <div class="controls">
+        <label>
+          Grid
+          <select id="sizeSelect">
+            <option value="3x3">3x3</option>
+            <option value="4x4">4x4</option>
+            <option value="5">5x5</option>
+            <option value="6" selected>6x6</option>
+            <option value="7">7x7</option>
+            <option value="8">8x8</option>
+          </select>
+        </label>
+        <button id="newGameBtn">New Puzzle</button>
+      </div>
+    </header>
+
+    <section class="legend">
+      <div><span class="dot dot-solved"></span> solved tile</div>
+      <div><span class="dot dot-unsolved"></span> unsolved tile</div>
+      <div>Click any tile to rotate its outflow direction clockwise.</div>
+    </section>
+
+    <section class="status-row">
+      <div id="statusText">Build all accumulations to match targets.</div>
+      <div id="movesText">Moves: 0</div>
+    </section>
+
+    <section id="board" class="board" aria-label="Flow puzzle board"></section>
+
+    <section class="help-panel">
+      <h2>How It Works</h2>
+      <p>Each tile has a base runoff (small number at top-left). Water follows that tile's arrow to one neighboring tile.</p>
+      <p>The large center number is current accumulated flow. The bottom-right number is the target from the hidden DEM-derived solution.</p>
+      <p>When all current values equal targets, you win.</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
