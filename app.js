@@ -903,7 +903,10 @@ function renderBoard() {
   }
 
   if (state.tileShape === "hex") {
-    const halfTile = state.lockedTileSize / 2;
+    const styles = getComputedStyle(boardEl);
+    const hexGap = Number.parseFloat(styles.columnGap) || 0;
+    // Each hex spans two tracks plus one internal column gap; subtract that internal gap.
+    const halfTile = Math.max(1, (state.lockedTileSize - hexGap) / 2);
     boardEl.style.gridTemplateColumns = `repeat(${state.cols * 2 + 1}, ${halfTile}px)`;
     boardEl.style.gridAutoRows = `${Math.round(state.lockedTileSize * 0.866)}px`;
   } else {

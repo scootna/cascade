@@ -159,9 +159,8 @@ button {
 }
 
 .board.shape-hex {
-  gap: 1px;
-  padding: 1px;
-  background: var(--tile-border);
+  gap: 4px;
+  padding: 4px;
   border-radius: 10px;
 }
 
@@ -207,13 +206,14 @@ button {
 }
 
 .tile {
+  --tile-fill: var(--tile);
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
   min-height: 60px;
   border-radius: 12px;
   border: 1px solid var(--tile-border);
-  background: var(--tile);
+  background: var(--tile-fill);
   transition: transform 120ms ease, background-color 150ms ease;
   user-select: none;
   touch-action: manipulation;
@@ -224,7 +224,17 @@ button {
   aspect-ratio: 0.866 / 1;
   border-radius: 0;
   border: none;
+  background: var(--tile-border);
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.board.shape-hex .tile::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  background: var(--tile-fill);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  pointer-events: none;
 }
 
 .tile:hover {
@@ -232,11 +242,11 @@ button {
 }
 
 .tile.solved {
-  background: var(--solved);
+  --tile-fill: var(--solved);
 }
 
 .tile.unsolved {
-  background: var(--unsolved);
+  --tile-fill: var(--unsolved);
 }
 
 .base,
