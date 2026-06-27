@@ -2,6 +2,8 @@ const state = {
   cols: 6,
   rows: 6,
   viewMode: "arrows",
+  markerScale: 34,
+  arrowShift: 1,
   board: [],
   moves: 0,
   solved: false,
@@ -14,8 +16,32 @@ const statusTextEl = document.getElementById("statusText");
 const movesTextEl = document.getElementById("movesText");
 const newGameBtn = document.getElementById("newGameBtn");
 const viewToggleBtn = document.getElementById("viewToggleBtn");
+const markerScaleSliderEl = document.getElementById("markerScaleSlider");
+const markerScaleValueEl = document.getElementById("markerScaleValue");
+const arrowShiftSliderEl = document.getElementById("arrowShiftSlider");
+const arrowShiftValueEl = document.getElementById("arrowShiftValue");
 const sizeSelect = document.getElementById("sizeSelect");
 const DIR_DEGREES = [0, -45, -90, -135, 180, 135, 90, 45];
+
+function applyMarkerScale() {
+  boardEl.style.setProperty("--dir-forward", `${state.markerScale}%`);
+  if (markerScaleValueEl) {
+    markerScaleValueEl.textContent = `${state.markerScale}%`;
+  }
+  if (markerScaleSliderEl) {
+    markerScaleSliderEl.value = String(state.markerScale);
+  }
+}
+
+function applyArrowShift() {
+  boardEl.style.setProperty("--triangle-scale", String(state.arrowShift));
+  if (arrowShiftValueEl) {
+    arrowShiftValueEl.textContent = `${state.arrowShift.toFixed(2)}x`;
+  }
+  if (arrowShiftSliderEl) {
+    arrowShiftSliderEl.value = String(state.arrowShift);
+  }
+}
 
 function applyViewMode() {
   if (!boardStageEl) {
@@ -60,6 +86,20 @@ if (viewToggleBtn) {
   viewToggleBtn.addEventListener("click", () => {
     state.viewMode = state.viewMode === "arrows" ? "lines" : "arrows";
     applyViewMode();
+  });
+}
+
+if (markerScaleSliderEl) {
+  markerScaleSliderEl.addEventListener("input", () => {
+    state.markerScale = Number(markerScaleSliderEl.value);
+    applyMarkerScale();
+  });
+}
+
+if (arrowShiftSliderEl) {
+  arrowShiftSliderEl.addEventListener("input", () => {
+    state.arrowShift = Number(arrowShiftSliderEl.value);
+    applyArrowShift();
   });
 }
 
@@ -382,6 +422,15 @@ function updateStatus() {
 
 function renderBoard() {
   boardEl.style.gridTemplateColumns = `repeat(${state.cols}, minmax(60px, 1fr))`;
+  const maxDim = Math.max(state.cols, state.rows);
+  boardEl.classList.remove("grid-regular", "grid-compact", "grid-dense");
+  if (maxDim >= 7) {
+    boardEl.classList.add("grid-dense");
+  } else if (maxDim >= 5) {
+    boardEl.classList.add("grid-compact");
+  } else {
+    boardEl.classList.add("grid-regular");
+  }
 
   const frag = document.createDocumentFragment();
   for (const cell of state.board) {
@@ -422,5 +471,7 @@ function renderBoard() {
 }
 
 startNewPuzzle(state.cols, state.rows);
+applyMarkerScale();
+applyArrowShift();
 applyViewMode();
 window.addEventListener("resize", buildLinkOverlay);

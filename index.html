@@ -25,6 +25,14 @@
             <option value="8">8x8</option>
           </select>
         </label>
+        <label class="range-control" for="markerScaleSlider">
+          Arrow Position <span id="markerScaleValue">34%</span>
+          <input id="markerScaleSlider" type="range" min="-10" max="45" step="1" value="34" />
+        </label>
+        <label class="range-control" for="arrowShiftSlider">
+          Marker Scale <span id="arrowShiftValue">1.00x</span>
+          <input id="arrowShiftSlider" type="range" min="0.55" max="3" step="0.05" value="1" />
+        </label>
         <button id="viewToggleBtn" type="button">View: Arrows</button>
         <button id="newGameBtn">New Puzzle</button>
       </div>

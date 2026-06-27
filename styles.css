@@ -66,6 +66,20 @@ body {
   font-size: 0.9rem;
 }
 
+.range-control {
+  min-width: 200px;
+}
+
+.range-control span {
+  font-weight: 700;
+  color: #2b566c;
+}
+
+.range-control input[type="range"] {
+  width: 100%;
+  accent-color: #2f7d6b;
+}
+
 select,
 button {
   border: 1px solid #94b2bf;
@@ -120,6 +134,9 @@ button {
 }
 
 .board {
+  --dir-scale: 1;
+  --dir-forward: 34%;
+  --triangle-scale: 1;
   position: relative;
   z-index: 1;
   margin-top: 1rem;
@@ -220,24 +237,42 @@ button {
 }
 
 .current {
-  inset: 0;
-  display: grid;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-grid;
   place-items: center;
+  min-width: 2.1rem;
+  min-height: 2.1rem;
+  padding: 0.2rem 0.46rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(26, 71, 94, 0.25);
   font-size: 1.23rem;
   font-weight: 800;
   color: #143446;
-  z-index: 3;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+  z-index: 4;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .direction {
   left: 50%;
-  top: 53%;
-  width: 62%;
-  height: 62%;
+  top: 50%;
+  width: calc(86% * var(--dir-scale));
+  height: calc(86% * var(--dir-scale));
   z-index: 2;
   transform: translate(-50%, -50%) rotate(var(--dir-angle, 0deg));
   transition: opacity 120ms ease;
+}
+
+.board.grid-compact .direction {
+  width: calc(76% * var(--dir-scale));
+  height: calc(76% * var(--dir-scale));
+}
+
+.board.grid-dense .direction {
+  width: calc(68% * var(--dir-scale));
+  height: calc(68% * var(--dir-scale));
 }
 
 .board-stage.show-lines .direction {
@@ -249,29 +284,27 @@ button {
 }
 
 .direction::before {
-  content: "";
-  position: absolute;
-  left: 14%;
-  right: 22%;
-  top: 50%;
-  height: 0.34rem;
-  transform: translateY(-50%);
-  border-radius: 999px;
-  background: #1e4f67;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+  display: none;
 }
 
 .direction::after {
   content: "";
   position: absolute;
-  right: 9%;
+  left: calc(50% + var(--dir-forward));
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%) scale(var(--triangle-scale));
+  transform-origin: center;
   width: 0;
   height: 0;
-  border-top: 0.42rem solid transparent;
-  border-bottom: 0.42rem solid transparent;
-  border-left: 0.7rem solid #1e4f67;
+  border-top: 0.36rem solid transparent;
+  border-bottom: 0.36rem solid transparent;
+  border-left: 0.72rem solid #1e4f67;
+}
+
+.board.grid-dense .direction::after {
+  border-top-width: 0.3rem;
+  border-bottom-width: 0.3rem;
+  border-left-width: 0.5rem;
 }
 
 .direction.sink {
