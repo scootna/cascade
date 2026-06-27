@@ -13,6 +13,7 @@ const state = {
   tileDelay: 55,
   rotationDirection: "cw",
   useRotationIcons: true,
+  useFlowSound: true,
   showRotatableHints: false,
   lastPointerClientX: null,
   lastPointerClientY: null,
@@ -50,6 +51,7 @@ const tileDelaySliderEl = document.getElementById("tileDelaySlider");
 const tileDelayValueEl = document.getElementById("tileDelayValue");
 const tileShapeToggleBtn = document.getElementById("tileShapeToggleBtn");
 const rotationIconsToggleBtn = document.getElementById("rotationIconsToggleBtn");
+const flowSoundToggleBtn = document.getElementById("flowSoundToggleBtn");
 const rotatableHintsToggleBtn = document.getElementById("rotatableHintsToggleBtn");
 const sizeSelect = document.getElementById("sizeSelect");
 const SQUARE_DIR_DEGREES = [0, -45, -90, -135, 180, 135, 90, 45];
@@ -57,6 +59,7 @@ const HEX_DIR_DEGREES = [0, -60, -120, 180, 120, 60];
 const rotationCursorEl = document.createElement("div");
 rotationCursorEl.className = "rotation-cursor";
 document.body.appendChild(rotationCursorEl);
+let flowAudioContext = null;
 
 function setSettingsModalOpen(isOpen) {
   document.body.classList.toggle("settings-open", isOpen);
@@ -204,6 +207,60 @@ function animateCurrentValueUpdate(currentEl, delay = 0) {
   );
 }
 
+function getFlowAudioContext() {
+  if (flowAudioContext) {
+    return flowAudioContext;
+  }
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) {
+    return null;
+  }
+  flowAudioContext = new Ctx();
+  return flowAudioContext;
+}
+
+function playFlowChangeSounds(valueDelayMap) {
+  if (!state.useFlowSound || valueDelayMap.size === 0) {
+    return;
+  }
+
+  const audioCtx = getFlowAudioContext();
+  if (!audioCtx) {
+    return;
+  }
+
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+
+  const sortedDelays = [...valueDelayMap.values()].sort((a, b) => a - b).slice(0, 8);
+  const spread = Math.max(1, sortedDelays.length - 1);
+
+  sortedDelays.forEach((delayMs, order) => {
+    const startTime = audioCtx.currentTime + Math.max(0, delayMs) / 1000;
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    const filterNode = audioCtx.createBiquadFilter();
+
+    filterNode.type = "lowpass";
+    filterNode.frequency.setValueAtTime(2200, startTime);
+
+    oscillator.type = "triangle";
+    oscillator.frequency.setValueAtTime(520 + (order / spread) * 160, startTime);
+
+    gainNode.gain.setValueAtTime(0.0001, startTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.028, startTime + 0.012);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.12);
+
+    oscillator.connect(filterNode);
+    filterNode.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    oscillator.start(startTime);
+    oscillator.stop(startTime + 0.13);
+  });
+}
+
 function collectDownstreamPath(startIndex) {
   const path = [];
   const visited = new Set([startIndex]);
@@ -295,6 +352,15 @@ function applyRotationIconsMode() {
   if (!state.useRotationIcons) {
     hideRotationCursor();
   }
+}
+
+function applyFlowSoundMode() {
+  if (!flowSoundToggleBtn) {
+    return;
+  }
+  flowSoundToggleBtn.textContent = state.useFlowSound
+    ? "Flow Sound: On"
+    : "Flow Sound: Off";
 }
 
 function applyRotatableHintsMode() {
@@ -431,6 +497,13 @@ if (rotationIconsToggleBtn) {
     state.useRotationIcons = !state.useRotationIcons;
     applyRotationIconsMode();
     renderBoard();
+  });
+}
+
+if (flowSoundToggleBtn) {
+  flowSoundToggleBtn.addEventListener("click", () => {
+    state.useFlowSound = !state.useFlowSound;
+    applyFlowSoundMode();
   });
 }
 
@@ -1057,6 +1130,8 @@ function rotateCell(index, tileEl = null, rotationDirection = state.rotationDire
     }
   }
 
+  playFlowChangeSounds(valueDelayMap);
+
   renderBoard();
   updateStatus();
 }
@@ -1229,6 +1304,7 @@ applyTileDelay();
 applyNumberMode();
 applyRotationDirection();
 applyRotationIconsMode();
+applyFlowSoundMode();
 applyRotatableHintsMode();
 applyValueBadgeMode();
 applyViewMode();
