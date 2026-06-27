@@ -158,6 +158,13 @@ button {
   gap: 0.5rem;
 }
 
+.board.shape-hex {
+  gap: 1px;
+  padding: 1px;
+  background: var(--tile-border);
+  border-radius: 10px;
+}
+
 .board-stage {
   position: relative;
 }
@@ -213,6 +220,13 @@ button {
   overflow: hidden;
 }
 
+.board.shape-hex .tile {
+  aspect-ratio: 0.866 / 1;
+  border-radius: 0;
+  border: none;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
 .tile:hover {
   transform: translateY(-1px);
 }
@@ -245,6 +259,19 @@ button {
   font-size: 0.8rem;
   font-weight: 400;
   color: #476273;
+}
+
+.board.shape-hex .base {
+  top: 0.14rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.board.shape-hex .target {
+  bottom: 0.14rem;
+  right: 50%;
+  transform: translateX(50%);
+  z-index: 5;
 }
 
 .current {

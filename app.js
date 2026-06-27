@@ -1,6 +1,7 @@
 const state = {
   cols: 4,
   rows: 4,
+  tileShape: "square",
   viewMode: "arrows",
   hideBaseAndMatchedCurrent: true,
   showCurrentValueBadge: false,
@@ -39,11 +40,25 @@ const bounceStrengthSliderEl = document.getElementById("bounceStrengthSlider");
 const bounceStrengthValueEl = document.getElementById("bounceStrengthValue");
 const tileDelaySliderEl = document.getElementById("tileDelaySlider");
 const tileDelayValueEl = document.getElementById("tileDelayValue");
+const tileShapeToggleBtn = document.getElementById("tileShapeToggleBtn");
 const sizeSelect = document.getElementById("sizeSelect");
-const DIR_DEGREES = [0, -45, -90, -135, 180, 135, 90, 45];
+const SQUARE_DIR_DEGREES = [0, -45, -90, -135, 180, 135, 90, 45];
+const HEX_DIR_DEGREES = [0, -60, -120, 180, 120, 60];
+
+function getDirectionCount() {
+  return state.tileShape === "hex" ? 6 : 8;
+}
+
+function getDirectionDegrees() {
+  return state.tileShape === "hex" ? HEX_DIR_DEGREES : SQUARE_DIR_DEGREES;
+}
 
 function getDirectionAngle(dir) {
-  return dir === null ? 0 : DIR_DEGREES[dir];
+  if (dir === null) {
+    return 0;
+  }
+  const degrees = getDirectionDegrees();
+  return degrees[dir] ?? 0;
 }
 
 function getClockwiseAngleDelta(fromAngle, toAngle) {
@@ -224,6 +239,16 @@ function applyRotationDirection() {
       : "Rotation: Counterclockwise";
 }
 
+function applyTileShape() {
+  boardEl.classList.toggle("shape-square", state.tileShape === "square");
+  boardEl.classList.toggle("shape-hex", state.tileShape === "hex");
+  if (!tileShapeToggleBtn) {
+    return;
+  }
+  tileShapeToggleBtn.textContent =
+    state.tileShape === "hex" ? "Tiles: Hexagons" : "Tiles: Squares";
+}
+
 function applyArrowPosition() {
   boardEl.style.setProperty("--dir-forward", `${state.arrowPosition}%`);
   if (arrowPositionValueEl) {
@@ -334,6 +359,14 @@ if (rotationDirectionToggleBtn) {
   });
 }
 
+if (tileShapeToggleBtn) {
+  tileShapeToggleBtn.addEventListener("click", () => {
+    state.tileShape = state.tileShape === "square" ? "hex" : "square";
+    applyTileShape();
+    startNewPuzzle(state.cols, state.rows);
+  });
+}
+
 if (numberModeToggleBtn) {
   numberModeToggleBtn.addEventListener("click", () => {
     state.hideBaseAndMatchedCurrent = !state.hideBaseAndMatchedCurrent;
@@ -404,16 +437,34 @@ function xyFromIndex(cols, index) {
 }
 
 function neighborsFor(cols, rows, x, y) {
-  const candidates = [
-    { dx: 1, dy: 0 },
-    { dx: 1, dy: -1 },
-    { dx: 0, dy: -1 },
-    { dx: -1, dy: -1 },
-    { dx: -1, dy: 0 },
-    { dx: -1, dy: 1 },
-    { dx: 0, dy: 1 },
-    { dx: 1, dy: 1 },
-  ];
+  const candidates = state.tileShape === "hex"
+    ? (y % 2 === 0
+      ? [
+        { dx: 1, dy: 0 },
+        { dx: 0, dy: -1 },
+        { dx: -1, dy: -1 },
+        { dx: -1, dy: 0 },
+        { dx: -1, dy: 1 },
+        { dx: 0, dy: 1 },
+      ]
+      : [
+        { dx: 1, dy: 0 },
+        { dx: 1, dy: -1 },
+        { dx: 0, dy: -1 },
+        { dx: -1, dy: 0 },
+        { dx: 0, dy: 1 },
+        { dx: 1, dy: 1 },
+      ])
+    : [
+      { dx: 1, dy: 0 },
+      { dx: 1, dy: -1 },
+      { dx: 0, dy: -1 },
+      { dx: -1, dy: -1 },
+      { dx: -1, dy: 0 },
+      { dx: -1, dy: 1 },
+      { dx: 0, dy: 1 },
+      { dx: 1, dy: 1 },
+    ];
 
   const valid = [];
   for (let dir = 0; dir < candidates.length; dir += 1) {
@@ -471,16 +522,39 @@ function followDirection(cols, rows, index, dir) {
     return index;
   }
   const { x, y } = xyFromIndex(cols, index);
-  const all = [
-    { dx: 1, dy: 0 },
-    { dx: 1, dy: -1 },
-    { dx: 0, dy: -1 },
-    { dx: -1, dy: -1 },
-    { dx: -1, dy: 0 },
-    { dx: -1, dy: 1 },
-    { dx: 0, dy: 1 },
-    { dx: 1, dy: 1 },
-  ];
+  const all = state.tileShape === "hex"
+    ? (y % 2 === 0
+      ? [
+        { dx: 1, dy: 0 },
+        { dx: 0, dy: -1 },
+        { dx: -1, dy: -1 },
+        { dx: -1, dy: 0 },
+        { dx: -1, dy: 1 },
+        { dx: 0, dy: 1 },
+      ]
+      : [
+        { dx: 1, dy: 0 },
+        { dx: 1, dy: -1 },
+        { dx: 0, dy: -1 },
+        { dx: -1, dy: 0 },
+        { dx: 0, dy: 1 },
+        { dx: 1, dy: 1 },
+      ])
+    : [
+      { dx: 1, dy: 0 },
+      { dx: 1, dy: -1 },
+      { dx: 0, dy: -1 },
+      { dx: -1, dy: -1 },
+      { dx: -1, dy: 0 },
+      { dx: -1, dy: 1 },
+      { dx: 0, dy: 1 },
+      { dx: 1, dy: 1 },
+    ];
+
+  if (dir < 0 || dir >= all.length) {
+    return index;
+  }
+
   const nx = x + all[dir].dx;
   const ny = y + all[dir].dy;
   if (!inBounds(cols, rows, nx, ny)) {
@@ -521,7 +595,7 @@ function wouldCreateCycle(board, startIndex, candidateDir) {
 }
 
 function shuffledDirections() {
-  const dirs = [0, 1, 2, 3, 4, 5, 6, 7];
+  const dirs = Array.from({ length: getDirectionCount() }, (_, i) => i);
   for (let i = dirs.length - 1; i > 0; i -= 1) {
     const swapIndex = Math.floor(Math.random() * (i + 1));
     [dirs[i], dirs[swapIndex]] = [dirs[swapIndex], dirs[i]];
@@ -530,9 +604,11 @@ function shuffledDirections() {
 }
 
 function findNextValidDirection(board, cellIndex, currentDir, excludedDir = null) {
+  const directionCount = getDirectionCount();
   const directionStep = state.rotationDirection === "cw" ? -1 : 1;
-  for (let offset = 1; offset <= 8; offset += 1) {
-    const candidateDir = (currentDir + directionStep * offset + 8 * 8) % 8;
+  for (let offset = 1; offset <= directionCount; offset += 1) {
+    const candidateDir =
+      (currentDir + directionStep * offset + directionCount * directionCount) % directionCount;
     if (candidateDir === excludedDir) {
       continue;
     }
@@ -826,7 +902,15 @@ function renderBoard() {
     boardEl.style.setProperty("--locked-tile-size", `${state.lockedTileSize}px`);
   }
 
-  boardEl.style.gridTemplateColumns = `repeat(${state.cols}, var(--locked-tile-size))`;
+  if (state.tileShape === "hex") {
+    const halfTile = state.lockedTileSize / 2;
+    boardEl.style.gridTemplateColumns = `repeat(${state.cols * 2 + 1}, ${halfTile}px)`;
+    boardEl.style.gridAutoRows = `${Math.round(state.lockedTileSize * 0.866)}px`;
+  } else {
+    boardEl.style.gridTemplateColumns = `repeat(${state.cols}, var(--locked-tile-size))`;
+    boardEl.style.gridAutoRows = "";
+  }
+
   const maxDim = Math.max(state.cols, state.rows);
   boardEl.classList.remove("grid-regular", "grid-compact", "grid-dense");
   if (maxDim >= 7) {
@@ -874,11 +958,18 @@ function renderBoard() {
     if (cell.currentDir === null) {
       direction.classList.add("sink");
     } else {
-      direction.style.setProperty("--dir-angle", `${DIR_DEGREES[cell.currentDir]}deg`);
+      direction.style.setProperty("--dir-angle", `${getDirectionAngle(cell.currentDir)}deg`);
       if (cell.rotationFromDir !== undefined) {
         animateDirectionRotation(direction, cell.rotationFromDir, cell.currentDir);
         delete cell.rotationFromDir;
       }
+    }
+
+    if (state.tileShape === "hex") {
+      const { x, y } = xyFromIndex(state.cols, cell.index);
+      const startCol = x * 2 + 1 + (y % 2);
+      tile.style.gridColumn = `${startCol} / span 2`;
+      tile.style.gridRow = String(y + 1);
     }
 
     tile.append(base, direction, current, target);
@@ -891,6 +982,7 @@ function renderBoard() {
 }
 
 startNewPuzzle(state.cols, state.rows);
+applyTileShape();
 applyArrowPosition();
 applyArrowScale();
 applyCurrentValueScale();
