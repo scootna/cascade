@@ -54,6 +54,20 @@ body {
   letter-spacing: 0.01em;
 }
 
+.title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #476273;
+}
+
 .topbar p {
   margin: 0.35rem 0 0;
   max-width: 55ch;

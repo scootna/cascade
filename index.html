@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TauDEM Flow Puzzle (Web)</title>
+  <title>Cascade Flow Puzzle (Web)</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
       <div>
-        <h1>Flow Accumulation Puzzle</h1>
-        <p>Rotate tiles to route runoff so every tile matches its target accumulation.</p>
+        <div class="title-row">
+          <h1>Cascade</h1>
+          <h5 class="subtitle">A Hydrology Inspired Puzzle</h5>
+        </div>
+        <p>Rotate tiles to route water runoff so every tile matches its target accumulation.</p>
       </div>
       <div class="topbar-actions">
         <button id="settingsToggleBtn" type="button">Settings</button>
@@ -71,17 +74,6 @@
       </div>
     </aside>
 
-    <section class="legend">
-      <div><span class="dot dot-solved"></span> solved tile</div>
-      <div><span class="dot dot-unsolved"></span> unsolved tile</div>
-      <div>Click any tile to rotate its outflow direction in the selected rotation mode.</div>
-    </section>
-
-    <section class="status-row">
-      <div id="statusText">Build all accumulations to match targets.</div>
-      <div id="movesText">Moves: 0</div>
-    </section>
-
     <section id="boardStage" class="board-stage show-arrows">
       <svg id="linkOverlay" class="link-overlay" aria-hidden="true"></svg>
       <section id="board" class="board" aria-label="Flow puzzle board"></section>
@@ -92,6 +84,17 @@
       <p>Each tile has a base runoff. Water follows that tile's arrow to one neighboring tile.</p>
       <p>The large center number is the base runoff plus current accumulated flow. The bottom-right number is the target accumulated flow.</p>
       <p>When all current values equal targets, you win.</p>
+    </section>
+
+    <section class="legend">
+      <div><span class="dot dot-solved"></span> solved tile</div>
+      <div><span class="dot dot-unsolved"></span> unsolved tile</div>
+      <div>Click any tile to rotate its outflow direction in the selected rotation mode.</div>
+    </section>
+
+    <section class="status-row">
+      <div id="statusText">Build all accumulations to match targets.</div>
+      <div id="movesText">Moves: 0</div>
     </section>
   </main>
 
