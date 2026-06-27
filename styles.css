@@ -120,9 +120,55 @@ button {
 }
 
 .board {
+  position: relative;
+  z-index: 1;
   margin-top: 1rem;
   display: grid;
   gap: 0.5rem;
+}
+
+.board-stage {
+  position: relative;
+}
+
+.link-overlay {
+  position: absolute;
+  inset: 1rem 0 0;
+  width: 100%;
+  height: calc(100% - 1rem);
+  z-index: 3;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.board-stage.show-arrows .link-overlay {
+  opacity: 0;
+}
+
+.board-stage.show-lines .link-overlay {
+  opacity: 1;
+}
+
+.flow-link {
+  stroke: #0f5e86;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  opacity: 0.95;
+  fill: none;
+  stroke-dasharray: 7 7;
+  animation: flow-dash 1.2s linear infinite;
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.75));
+}
+
+.flow-link.solved {
+  stroke: #1e8b66;
+  opacity: 0.92;
+}
+
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -14;
+  }
 }
 
 .tile {
@@ -136,6 +182,7 @@ button {
   transition: transform 120ms ease, background-color 150ms ease;
   user-select: none;
   touch-action: manipulation;
+  overflow: hidden;
 }
 
 .tile:hover {
@@ -153,7 +200,7 @@ button {
 .base,
 .target,
 .current,
-.arrow {
+.direction {
   position: absolute;
 }
 
@@ -179,13 +226,71 @@ button {
   font-size: 1.23rem;
   font-weight: 800;
   color: #143446;
+  z-index: 3;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
-.arrow {
-  top: 0.15rem;
-  right: 0.35rem;
-  font-size: 0.9rem;
-  color: #355c71;
+.direction {
+  left: 50%;
+  top: 53%;
+  width: 62%;
+  height: 62%;
+  z-index: 2;
+  transform: translate(-50%, -50%) rotate(var(--dir-angle, 0deg));
+  transition: opacity 120ms ease;
+}
+
+.board-stage.show-lines .direction {
+  opacity: 0;
+}
+
+.board-stage.show-arrows .direction {
+  opacity: 1;
+}
+
+.direction::before {
+  content: "";
+  position: absolute;
+  left: 14%;
+  right: 22%;
+  top: 50%;
+  height: 0.34rem;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: #1e4f67;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.direction::after {
+  content: "";
+  position: absolute;
+  right: 9%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 0.42rem solid transparent;
+  border-bottom: 0.42rem solid transparent;
+  border-left: 0.7rem solid #1e4f67;
+}
+
+.direction.sink {
+  transform: translate(-50%, -50%);
+}
+
+.direction.sink::before {
+  left: 50%;
+  right: auto;
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #2e647f;
+  box-shadow: 0 0 0 2px rgba(30, 79, 103, 0.24);
+}
+
+.direction.sink::after {
+  display: none;
 }
 
 .help-panel h2 {

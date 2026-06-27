@@ -1,18 +1,32 @@
-const ARROWS = ["→", "↗", "↑", "↖", "←", "↙", "↓", "↘"];
-
 const state = {
   cols: 6,
   rows: 6,
+  viewMode: "arrows",
   board: [],
   moves: 0,
   solved: false,
 };
 
 const boardEl = document.getElementById("board");
+const boardStageEl = document.getElementById("boardStage");
+const linkOverlayEl = document.getElementById("linkOverlay");
 const statusTextEl = document.getElementById("statusText");
 const movesTextEl = document.getElementById("movesText");
 const newGameBtn = document.getElementById("newGameBtn");
+const viewToggleBtn = document.getElementById("viewToggleBtn");
 const sizeSelect = document.getElementById("sizeSelect");
+const DIR_DEGREES = [0, -45, -90, -135, 180, 135, 90, 45];
+
+function applyViewMode() {
+  if (!boardStageEl) {
+    return;
+  }
+  boardStageEl.classList.toggle("show-arrows", state.viewMode === "arrows");
+  boardStageEl.classList.toggle("show-lines", state.viewMode === "lines");
+  if (viewToggleBtn) {
+    viewToggleBtn.textContent = state.viewMode === "arrows" ? "View: Arrows" : "View: Flow Lines";
+  }
+}
 
 function parseGridValue(value) {
   const parts = value.split("x");
@@ -41,6 +55,13 @@ sizeSelect.addEventListener("change", () => {
   const grid = parseGridValue(sizeSelect.value);
   startNewPuzzle(grid.cols, grid.rows);
 });
+
+if (viewToggleBtn) {
+  viewToggleBtn.addEventListener("click", () => {
+    state.viewMode = state.viewMode === "arrows" ? "lines" : "arrows";
+    applyViewMode();
+  });
+}
 
 function inBounds(cols, rows, x, y) {
   return x >= 0 && y >= 0 && x < cols && y < rows;
@@ -138,6 +159,74 @@ function followDirection(cols, rows, index, dir) {
     return index;
   }
   return indexFromXY(cols, nx, ny);
+}
+
+function buildLinkOverlay() {
+  if (!linkOverlayEl) {
+    return;
+  }
+
+  const boardRect = boardEl.getBoundingClientRect();
+  const width = Math.max(1, boardRect.width);
+  const height = Math.max(1, boardRect.height);
+
+  linkOverlayEl.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  linkOverlayEl.setAttribute("width", String(width));
+  linkOverlayEl.setAttribute("height", String(height));
+
+  const tileEls = boardEl.querySelectorAll(".tile");
+  if (tileEls.length === 0) {
+    linkOverlayEl.replaceChildren();
+    return;
+  }
+
+  const centers = new Map();
+  tileEls.forEach((tileEl) => {
+    const index = Number(tileEl.dataset.index);
+    const rect = tileEl.getBoundingClientRect();
+    centers.set(index, {
+      x: rect.left - boardRect.left + rect.width / 2,
+      y: rect.top - boardRect.top + rect.height / 2,
+    });
+  });
+
+  const ns = "http://www.w3.org/2000/svg";
+  const fragment = document.createDocumentFragment();
+
+  for (const cell of state.board) {
+    if (cell.currentDir === null) {
+      continue;
+    }
+
+    const from = centers.get(cell.index);
+    const toIndex = followDirection(state.cols, state.rows, cell.index, cell.currentDir);
+    if (toIndex === cell.index) {
+      continue;
+    }
+
+    const to = centers.get(toIndex);
+    if (!from || !to) {
+      continue;
+    }
+
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const lineEndX = from.x + dx * 0.78;
+    const lineEndY = from.y + dy * 0.78;
+
+    const line = document.createElementNS(ns, "line");
+    line.setAttribute("x1", String(from.x));
+    line.setAttribute("y1", String(from.y));
+    line.setAttribute("x2", String(lineEndX));
+    line.setAttribute("y2", String(lineEndY));
+    line.setAttribute(
+      "class",
+      `flow-link ${cell.currentAccum === cell.targetAccum ? "solved" : ""}`
+    );
+    fragment.appendChild(line);
+  }
+
+  linkOverlayEl.replaceChildren(fragment);
 }
 
 function accumulate(board, useSolution) {
@@ -301,6 +390,7 @@ function renderBoard() {
     tile.className = "tile";
     tile.classList.add(cell.currentAccum === cell.targetAccum ? "solved" : "unsolved");
     tile.setAttribute("aria-label", `Tile ${cell.index}`);
+    tile.dataset.index = String(cell.index);
 
     const base = document.createElement("span");
     base.className = "base";
@@ -314,16 +404,23 @@ function renderBoard() {
     target.className = "target";
     target.textContent = `t:${cell.targetAccum}`;
 
-    const arrow = document.createElement("span");
-    arrow.className = "arrow";
-    arrow.textContent = cell.currentDir === null ? "•" : ARROWS[cell.currentDir];
+    const direction = document.createElement("span");
+    direction.className = "direction";
+    if (cell.currentDir === null) {
+      direction.classList.add("sink");
+    } else {
+      direction.style.setProperty("--dir-angle", `${DIR_DEGREES[cell.currentDir]}deg`);
+    }
 
-    tile.append(base, current, target, arrow);
+    tile.append(base, direction, current, target);
     tile.addEventListener("click", () => rotateCell(cell.index));
     frag.appendChild(tile);
   }
 
   boardEl.replaceChildren(frag);
+  buildLinkOverlay();
 }
 
 startNewPuzzle(state.cols, state.rows);
+applyViewMode();
+window.addEventListener("resize", buildLinkOverlay);
