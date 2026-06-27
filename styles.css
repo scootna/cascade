@@ -16,9 +16,16 @@
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+  padding: 0.6rem;
   font-family: "Avenir Next", "Trebuchet MS", sans-serif;
   color: var(--ink);
   background: radial-gradient(circle at 15% 20%, #fef8ef 0%, transparent 40%),
@@ -27,13 +34,18 @@ body {
 }
 
 .app-shell {
-  width: min(1160px, 98vw);
-  margin: 1.5rem auto 2rem;
-  padding: 1rem;
+  width: min(1160px, 100%);
+  height: 100%;
+  margin: 0 auto;
+  padding: 0.9rem;
   border: 1px solid #b8cad5;
   border-radius: 18px;
   background: color-mix(in srgb, var(--panel) 88%, white 12%);
   box-shadow: 0 16px 45px rgba(24, 52, 73, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
 }
 
 .topbar {
@@ -225,7 +237,6 @@ button {
   z-index: 1;
   width: fit-content;
   margin-inline: auto;
-  margin-top: 1rem;
   display: grid;
   gap: 0.5rem;
 }
@@ -238,6 +249,12 @@ button {
 
 .board-stage {
   position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .board-stage.solved-celebrate {
@@ -559,6 +576,15 @@ button {
 }
 
 @media (max-width: 760px) {
+  body {
+    padding: 0.4rem;
+  }
+
+  .app-shell {
+    padding: 0.6rem;
+    gap: 0.55rem;
+  }
+
   .topbar {
     flex-direction: column;
   }
@@ -566,5 +592,15 @@ button {
   .topbar-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .help-panel,
+  .legend,
+  .status-row {
+    padding: 0.5rem 0.65rem;
+  }
+
+  .help-panel p {
+    margin: 0.18rem 0;
   }
 }

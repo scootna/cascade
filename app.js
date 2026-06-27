@@ -1314,19 +1314,25 @@ function updateStatus() {
 }
 
 function renderBoard() {
-  if (state.lockedTileSize === null) {
-    const cssLockedTileSize = parseFloat(
-      getComputedStyle(boardEl).getPropertyValue("--locked-tile-size")
-    );
-    state.lockedTileSize = Number.isFinite(cssLockedTileSize) && cssLockedTileSize > 0
-      ? cssLockedTileSize
-      : 120;
-    boardEl.style.setProperty("--locked-tile-size", `${state.lockedTileSize}px`);
-  }
+  const stageWidth = Math.max(1, boardStageEl?.clientWidth ?? 0);
+  const stageHeight = Math.max(1, boardStageEl?.clientHeight ?? 0);
+  const boardStyles = getComputedStyle(boardEl);
+  const tileGap = Number.parseFloat(boardStyles.gap || boardStyles.columnGap || "0") || 0;
 
   if (state.tileShape === "hex") {
-    const styles = getComputedStyle(boardEl);
-    const hexGap = Number.parseFloat(styles.columnGap) || 0;
+    const widthLimit = (2 * stageWidth - (2 * state.cols - 1) * tileGap) / (2 * state.cols + 1);
+    const heightLimit = (stageHeight - (state.rows - 1) * tileGap) / (0.866 * state.rows);
+    state.lockedTileSize = Math.max(56, Math.floor(Math.min(widthLimit, heightLimit) - 2));
+  } else {
+    const widthLimit = (stageWidth - (state.cols - 1) * tileGap) / state.cols;
+    const heightLimit = (stageHeight - (state.rows - 1) * tileGap) / state.rows;
+    state.lockedTileSize = Math.max(56, Math.floor(Math.min(widthLimit, heightLimit) - 2));
+  }
+
+  boardEl.style.setProperty("--locked-tile-size", `${state.lockedTileSize}px`);
+
+  if (state.tileShape === "hex") {
+    const hexGap = Number.parseFloat(boardStyles.columnGap) || 0;
     // Each hex spans two tracks plus one internal column gap; subtract that internal gap.
     const halfTile = Math.max(1, (state.lockedTileSize - hexGap) / 2);
     boardEl.style.gridTemplateColumns = `repeat(${state.cols * 2 + 1}, ${halfTile}px)`;
@@ -1477,4 +1483,6 @@ window.addEventListener("mousemove", (event) => {
     hideRotationCursor();
   }
 });
-window.addEventListener("resize", buildLinkOverlay);
+window.addEventListener("resize", () => {
+  renderBoard();
+});
