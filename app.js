@@ -953,8 +953,14 @@ function findNextValidDirection(
 }
 
 function getRotationDirectionFromClick(tileEl, event) {
-  if (!tileEl || !event || typeof event.clientX !== "number" || event.clientX <= 0) {
-    return state.rotationDirection;
+  if (
+    window.matchMedia("(hover: none), (pointer: coarse)").matches
+    || !tileEl
+    || !event
+    || typeof event.clientX !== "number"
+    || event.clientX <= 0
+  ) {
+    return "cw";
   }
 
   const rect = tileEl.getBoundingClientRect();
