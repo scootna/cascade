@@ -4,8 +4,8 @@ const state = {
   viewMode: "arrows",
   hideBaseAndMatchedCurrent: true,
   showCurrentValueBadge: false,
-  arrowPosition: 50,
-  arrowShift: 3,
+  arrowPosition: 40,
+  arrowScale: 3,
   currentValueScale: 2,
   lockedTileSize: null,
   board: [],
@@ -24,8 +24,8 @@ const numberModeToggleBtn = document.getElementById("numberModeToggleBtn");
 const viewToggleBtn = document.getElementById("viewToggleBtn");
 const arrowPositionSliderEl = document.getElementById("arrowPositionSlider");
 const arrowPositionValueEl = document.getElementById("arrowPositionValue");
-const arrowShiftSliderEl = document.getElementById("arrowShiftSlider");
-const arrowShiftValueEl = document.getElementById("arrowShiftValue");
+const arrowScaleSliderEl = document.getElementById("arrowScaleSlider");
+const arrowScaleValueEl = document.getElementById("arrowScaleValue");
 const currentValueScaleSliderEl = document.getElementById("currentValueScaleSlider");
 const currentValueScaleValueEl = document.getElementById("currentValueScaleValue");
 const sizeSelect = document.getElementById("sizeSelect");
@@ -60,13 +60,13 @@ function applyArrowPosition() {
   }
 }
 
-function applyArrowShift() {
-  boardEl.style.setProperty("--triangle-scale", String(state.arrowShift));
-  if (arrowShiftValueEl) {
-    arrowShiftValueEl.textContent = `${state.arrowShift.toFixed(2)}x`;
+function applyArrowScale() {
+  boardEl.style.setProperty("--triangle-scale", String(state.arrowScale));
+  if (arrowScaleValueEl) {
+    arrowScaleValueEl.textContent = `${state.arrowScale.toFixed(2)}x`;
   }
-  if (arrowShiftSliderEl) {
-    arrowShiftSliderEl.value = String(state.arrowShift);
+  if (arrowScaleSliderEl) {
+    arrowScaleSliderEl.value = String(state.arrowScale);
   }
 }
 
@@ -148,10 +148,10 @@ if (arrowPositionSliderEl) {
   });
 }
 
-if (arrowShiftSliderEl) {
-  arrowShiftSliderEl.addEventListener("input", () => {
-    state.arrowShift = Number(arrowShiftSliderEl.value);
-    applyArrowShift();
+if (arrowScaleSliderEl) {
+  arrowScaleSliderEl.addEventListener("input", () => {
+    state.arrowScale = Number(arrowScaleSliderEl.value);
+    applyArrowScale();
   });
 }
 
@@ -554,7 +554,7 @@ function renderBoard() {
 
 startNewPuzzle(state.cols, state.rows);
 applyArrowPosition();
-applyArrowShift();
+applyArrowScale();
 applyCurrentValueScale();
 applyNumberMode();
 applyValueBadgeMode();
