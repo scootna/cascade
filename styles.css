@@ -577,16 +577,17 @@ button {
 
 @media (max-width: 760px) {
   body {
-    padding: 0.4rem;
+    padding: 0.25rem;
   }
 
   .app-shell {
-    padding: 0.6rem;
-    gap: 0.55rem;
+    padding: 0.45rem;
+    gap: 0.35rem;
   }
 
   .topbar {
     flex-direction: column;
+    gap: 0.35rem;
   }
 
   .topbar-actions {
@@ -594,13 +595,34 @@ button {
     justify-content: flex-end;
   }
 
-  .help-panel,
-  .legend,
-  .status-row {
-    padding: 0.5rem 0.65rem;
+  .topbar p {
+    display: none;
   }
 
-  .help-panel p {
-    margin: 0.18rem 0;
+  .help-panel {
+    display: none;
+  }
+
+  .legend,
+  .status-row {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.88rem;
+    gap: 0.55rem;
+  }
+
+  .status-row {
+    justify-content: space-between;
+  }
+
+  .legend {
+    align-items: flex-start;
+  }
+
+  .board-stage {
+    min-height: 0;
+  }
+
+  .board {
+    gap: 0.35rem;
   }
 }
