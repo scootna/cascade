@@ -58,6 +58,7 @@ body {
 .topbar-actions {
   display: flex;
   align-items: flex-start;
+  gap: 0.5rem;
 }
 
 .topbar h1 {
@@ -261,18 +262,8 @@ button {
   animation: solved-stage-glow 720ms ease-out;
 }
 
-.post-win-actions {
-  display: none;
-  justify-content: center;
-  margin-top: 0.35rem;
-}
-
-.post-win-actions.visible {
-  display: flex;
-}
-
 #postWinNewGameBtn {
-  min-width: 180px;
+  min-width: 126px;
 }
 
 @keyframes solved-stage-glow {

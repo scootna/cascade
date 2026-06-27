@@ -34,7 +34,6 @@ const settingsModalEl = document.getElementById("settingsModal");
 const statusTextEl = document.getElementById("statusText");
 const movesTextEl = document.getElementById("movesText");
 const newGameBtn = document.getElementById("newGameBtn");
-const postWinActionsEl = document.getElementById("postWinActions");
 const postWinNewGameBtn = document.getElementById("postWinNewGameBtn");
 const rotationDirectionToggleBtn = document.getElementById("rotationDirectionToggleBtn");
 const valueBadgeToggleBtn = document.getElementById("valueBadgeToggleBtn");
@@ -1315,10 +1314,6 @@ function updateStatus() {
   const wasSolved = state.solved;
   const solvedNow = isSolved();
   state.solved = solvedNow;
-
-  if (postWinActionsEl) {
-    postWinActionsEl.classList.toggle("visible", solvedNow);
-  }
 
   if (solvedNow && !wasSolved) {
     triggerSolvedCelebration();
