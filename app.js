@@ -14,6 +14,7 @@ const state = {
   rotationDirection: "cw",
   useRotationIcons: false,
   useFlowSound: true,
+  allowNegativeBaseRunoff: false,
   showRotatableHints: false,
   lastPointerClientX: null,
   lastPointerClientY: null,
@@ -52,6 +53,7 @@ const tileDelayValueEl = document.getElementById("tileDelayValue");
 const tileShapeToggleBtn = document.getElementById("tileShapeToggleBtn");
 const rotationIconsToggleBtn = document.getElementById("rotationIconsToggleBtn");
 const flowSoundToggleBtn = document.getElementById("flowSoundToggleBtn");
+const negativeBaseToggleBtn = document.getElementById("negativeBaseToggleBtn");
 const rotatableHintsToggleBtn = document.getElementById("rotatableHintsToggleBtn");
 const sizeSelect = document.getElementById("sizeSelect");
 const SQUARE_DIR_DEGREES = [0, -45, -90, -135, 180, 135, 90, 45];
@@ -480,6 +482,15 @@ function applyFlowSoundMode() {
     : "Flow Sound: Off";
 }
 
+function applyNegativeBaseMode() {
+  if (!negativeBaseToggleBtn) {
+    return;
+  }
+  negativeBaseToggleBtn.textContent = state.allowNegativeBaseRunoff
+    ? "Negative Base Runoff: On"
+    : "Negative Base Runoff: Off";
+}
+
 function applyRotatableHintsMode() {
   if (!rotatableHintsToggleBtn) {
     return;
@@ -621,6 +632,14 @@ if (flowSoundToggleBtn) {
   flowSoundToggleBtn.addEventListener("click", () => {
     state.useFlowSound = !state.useFlowSound;
     applyFlowSoundMode();
+  });
+}
+
+if (negativeBaseToggleBtn) {
+  negativeBaseToggleBtn.addEventListener("click", () => {
+    state.allowNegativeBaseRunoff = !state.allowNegativeBaseRunoff;
+    applyNegativeBaseMode();
+    startNewPuzzle(state.cols, state.rows);
   });
 }
 
@@ -1159,9 +1178,12 @@ function startNewPuzzle(cols, rows) {
 
   const elev = makeElevation(cols, rows);
   const board = [];
+  const positiveBaseValues = [1, 2, 3];
+  const signedBaseValues = [-2, -1, 1, 2, 3];
 
   for (let i = 0; i < cols * rows; i += 1) {
-    const baseFlow = 1 + Math.floor(Math.random() * 3);
+    const pool = state.allowNegativeBaseRunoff ? signedBaseValues : positiveBaseValues;
+    const baseFlow = pool[Math.floor(Math.random() * pool.length)];
     const solutionDir = chooseSolutionDirection(cols, rows, elev, i);
     board.push({
       index: i,
@@ -1428,6 +1450,7 @@ applyNumberMode();
 applyRotationDirection();
 applyRotationIconsMode();
 applyFlowSoundMode();
+applyNegativeBaseMode();
 applyRotatableHintsMode();
 applyValueBadgeMode();
 applyViewMode();
