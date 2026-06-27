@@ -7,6 +7,8 @@ const state = {
   arrowPosition: 40,
   arrowScale: 3,
   currentValueScale: 2,
+  animationSpeed: 220,
+  bounceStrength: 2,
   lockedTileSize: null,
   board: [],
   moves: 0,
@@ -28,6 +30,10 @@ const arrowScaleSliderEl = document.getElementById("arrowScaleSlider");
 const arrowScaleValueEl = document.getElementById("arrowScaleValue");
 const currentValueScaleSliderEl = document.getElementById("currentValueScaleSlider");
 const currentValueScaleValueEl = document.getElementById("currentValueScaleValue");
+const animationSpeedSliderEl = document.getElementById("animationSpeedSlider");
+const animationSpeedValueEl = document.getElementById("animationSpeedValue");
+const bounceStrengthSliderEl = document.getElementById("bounceStrengthSlider");
+const bounceStrengthValueEl = document.getElementById("bounceStrengthValue");
 const sizeSelect = document.getElementById("sizeSelect");
 const DIR_DEGREES = [0, -45, -90, -135, 180, 135, 90, 45];
 
@@ -62,7 +68,27 @@ function animateDirectionRotation(directionEl, fromDir, toDir) {
       { transform: `translate(-50%, -50%) rotate(${finalAngle}deg)` },
     ],
     {
-      duration: 220,
+      duration: state.animationSpeed,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+    }
+  );
+}
+
+function animateTileBounce(tileEl) {
+  if (!tileEl || state.bounceStrength <= 0) {
+    return;
+  }
+
+  const overshoot = 1 + state.bounceStrength / 100;
+  tileEl.animate(
+    [
+      { transform: "scale(1)" },
+      { transform: `scale(${overshoot})`, offset: 0.35 },
+      { transform: "scale(0.985)", offset: 0.7 },
+      { transform: "scale(1)" },
+    ],
+    {
+      duration: state.animationSpeed,
       easing: "cubic-bezier(0.22, 1, 0.36, 1)",
     }
   );
@@ -114,6 +140,24 @@ function applyCurrentValueScale() {
   }
   if (currentValueScaleSliderEl) {
     currentValueScaleSliderEl.value = String(state.currentValueScale);
+  }
+}
+
+function applyAnimationSpeed() {
+  if (animationSpeedValueEl) {
+    animationSpeedValueEl.textContent = `${state.animationSpeed}ms`;
+  }
+  if (animationSpeedSliderEl) {
+    animationSpeedSliderEl.value = String(state.animationSpeed);
+  }
+}
+
+function applyBounceStrength() {
+  if (bounceStrengthValueEl) {
+    bounceStrengthValueEl.textContent = `${state.bounceStrength}%`;
+  }
+  if (bounceStrengthSliderEl) {
+    bounceStrengthSliderEl.value = String(state.bounceStrength);
   }
 }
 
@@ -196,6 +240,20 @@ if (currentValueScaleSliderEl) {
   currentValueScaleSliderEl.addEventListener("input", () => {
     state.currentValueScale = Number(currentValueScaleSliderEl.value);
     applyCurrentValueScale();
+  });
+}
+
+if (animationSpeedSliderEl) {
+  animationSpeedSliderEl.addEventListener("input", () => {
+    state.animationSpeed = Number(animationSpeedSliderEl.value);
+    applyAnimationSpeed();
+  });
+}
+
+if (bounceStrengthSliderEl) {
+  bounceStrengthSliderEl.addEventListener("input", () => {
+    state.bounceStrength = Number(bounceStrengthSliderEl.value);
+    applyBounceStrength();
   });
 }
 
@@ -494,6 +552,7 @@ function rotateCell(index) {
 
   cell.currentDir = nextDir;
   cell.rotationFromDir = previousDir;
+  cell.shouldBounce = true;
   state.moves += 1;
   movesTextEl.textContent = `Moves: ${state.moves}`;
 
@@ -587,6 +646,11 @@ function renderBoard() {
       }
     }
 
+    if (cell.shouldBounce) {
+      animateTileBounce(tile);
+      delete cell.shouldBounce;
+    }
+
     tile.append(base, direction, current, target);
     tile.addEventListener("click", () => rotateCell(cell.index));
     frag.appendChild(tile);
@@ -600,6 +664,8 @@ startNewPuzzle(state.cols, state.rows);
 applyArrowPosition();
 applyArrowScale();
 applyCurrentValueScale();
+applyAnimationSpeed();
+applyBounceStrength();
 applyNumberMode();
 applyValueBadgeMode();
 applyViewMode();
