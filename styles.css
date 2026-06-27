@@ -138,8 +138,11 @@ button {
   --dir-forward: 34%;
   --triangle-scale: 1;
   --current-scale: 1;
+  --locked-tile-size: 120px;
   position: relative;
   z-index: 1;
+  width: fit-content;
+  margin-inline: auto;
   margin-top: 1rem;
   display: grid;
   gap: 0.5rem;
@@ -151,9 +154,6 @@ button {
 
 .link-overlay {
   position: absolute;
-  inset: 1rem 0 0;
-  width: 100%;
-  height: calc(100% - 1rem);
   z-index: 3;
   pointer-events: none;
   transition: opacity 120ms ease;

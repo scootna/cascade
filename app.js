@@ -7,6 +7,7 @@ const state = {
   markerScale: 50,
   arrowShift: 3,
   currentValueScale: 2,
+  lockedTileSize: null,
   board: [],
   moves: 0,
   solved: false,
@@ -260,13 +261,21 @@ function followDirection(cols, rows, index, dir) {
 }
 
 function buildLinkOverlay() {
-  if (!linkOverlayEl) {
+  if (!linkOverlayEl || !boardStageEl) {
     return;
   }
 
   const boardRect = boardEl.getBoundingClientRect();
+  const stageRect = boardStageEl.getBoundingClientRect();
   const width = Math.max(1, boardRect.width);
   const height = Math.max(1, boardRect.height);
+  const left = Math.max(0, boardRect.left - stageRect.left);
+  const top = Math.max(0, boardRect.top - stageRect.top);
+
+  linkOverlayEl.style.left = `${left}px`;
+  linkOverlayEl.style.top = `${top}px`;
+  linkOverlayEl.style.width = `${width}px`;
+  linkOverlayEl.style.height = `${height}px`;
 
   linkOverlayEl.setAttribute("viewBox", `0 0 ${width} ${height}`);
   linkOverlayEl.setAttribute("width", String(width));
@@ -479,7 +488,16 @@ function updateStatus() {
 }
 
 function renderBoard() {
-  boardEl.style.gridTemplateColumns = `repeat(${state.cols}, minmax(60px, 1fr))`;
+  if (state.lockedTileSize === null) {
+    const gapPx = 8;
+    const sixBySixCols = 6;
+    const hostWidth = boardStageEl ? boardStageEl.clientWidth : 960;
+    const computed = Math.floor((hostWidth - (sixBySixCols - 1) * gapPx) / sixBySixCols);
+    state.lockedTileSize = Math.max(52, computed);
+    boardEl.style.setProperty("--locked-tile-size", `${state.lockedTileSize}px`);
+  }
+
+  boardEl.style.gridTemplateColumns = `repeat(${state.cols}, var(--locked-tile-size))`;
   const maxDim = Math.max(state.cols, state.rows);
   boardEl.classList.remove("grid-regular", "grid-compact", "grid-dense");
   if (maxDim >= 7) {
