@@ -5,8 +5,8 @@ const state = {
   hideBaseAndMatchedCurrent: true,
   showCurrentValueBadge: false,
   arrowPosition: 40,
-  arrowScale: 3,
-  currentValueScale: 2,
+  arrowScale: 2.15,
+  currentValueScale: 1.4,
   animationSpeed: 220,
   bounceStrength: 2,
   tileDelay: 55,
@@ -784,11 +784,12 @@ function updateStatus() {
 
 function renderBoard() {
   if (state.lockedTileSize === null) {
-    const gapPx = 8;
-    const sixBySixCols = 6;
-    const hostWidth = boardStageEl ? boardStageEl.clientWidth : 960;
-    const computed = Math.floor((hostWidth - (sixBySixCols - 1) * gapPx) / sixBySixCols);
-    state.lockedTileSize = Math.max(52, computed);
+    const cssLockedTileSize = parseFloat(
+      getComputedStyle(boardEl).getPropertyValue("--locked-tile-size")
+    );
+    state.lockedTileSize = Number.isFinite(cssLockedTileSize) && cssLockedTileSize > 0
+      ? cssLockedTileSize
+      : 120;
     boardEl.style.setProperty("--locked-tile-size", `${state.lockedTileSize}px`);
   }
 

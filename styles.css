@@ -27,7 +27,7 @@ body {
 }
 
 .app-shell {
-  width: min(1080px, 94vw);
+  width: min(1160px, 98vw);
   margin: 1.5rem auto 2rem;
   padding: 1rem;
   border: 1px solid #b8cad5;
@@ -56,18 +56,28 @@ body {
 
 .controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
+  justify-content: flex-end;
   gap: 0.6rem;
+  max-width: min(100%, 760px);
 }
 
 .controls label {
   display: grid;
   gap: 0.25rem;
   font-size: 0.9rem;
+  flex: 1 1 180px;
+  min-width: 160px;
 }
 
 .range-control {
   min-width: 200px;
+}
+
+.controls > button {
+  flex: 0 1 auto;
+  align-self: end;
 }
 
 .range-control span {
