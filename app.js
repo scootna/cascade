@@ -13,6 +13,8 @@ const state = {
   tileDelay: 55,
   rotationDirection: "cw",
   showRotatableHints: false,
+  lastPointerClientX: null,
+  lastPointerClientY: null,
   lockedTileSize: null,
   board: [],
   moves: 0,
@@ -102,14 +104,14 @@ function getCounterclockwiseAngleDelta(fromAngle, toAngle) {
   return delta;
 }
 
-function animateDirectionRotation(directionEl, fromDir, toDir) {
+function animateDirectionRotation(directionEl, fromDir, toDir, rotationDirection = state.rotationDirection) {
   if (!directionEl || fromDir === null || toDir === null || fromDir === toDir) {
     return;
   }
 
   const fromAngle = getDirectionAngle(fromDir);
   const toAngle = getDirectionAngle(toDir);
-  const delta = state.rotationDirection === "cw"
+  const delta = rotationDirection === "cw"
     ? getClockwiseAngleDelta(fromAngle, toAngle)
     : getCounterclockwiseAngleDelta(fromAngle, toAngle);
   const finalAngle = fromAngle + delta;
@@ -681,9 +683,15 @@ function shuffledDirections() {
   return dirs;
 }
 
-function findNextValidDirection(board, cellIndex, currentDir, excludedDir = null) {
+function findNextValidDirection(
+  board,
+  cellIndex,
+  currentDir,
+  excludedDir = null,
+  rotationDirection = state.rotationDirection
+) {
   const directionCount = getDirectionCount();
-  const directionStep = state.rotationDirection === "cw" ? -1 : 1;
+  const directionStep = rotationDirection === "cw" ? -1 : 1;
   for (let offset = 1; offset <= directionCount; offset += 1) {
     const candidateDir =
       (currentDir + directionStep * offset + directionCount * directionCount) % directionCount;
@@ -698,6 +706,59 @@ function findNextValidDirection(board, cellIndex, currentDir, excludedDir = null
     }
   }
   return currentDir;
+}
+
+function getRotationDirectionFromClick(tileEl, event) {
+  if (!tileEl || !event || typeof event.clientX !== "number" || event.clientX <= 0) {
+    return state.rotationDirection;
+  }
+
+  const rect = tileEl.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  return clickX < rect.width / 2 ? "ccw" : "cw";
+}
+
+function updateTileHoverCursor(tileEl, event, canRotate) {
+  if (!tileEl) {
+    return;
+  }
+
+  tileEl.classList.remove("cursor-cw", "cursor-ccw");
+
+  if (!canRotate) {
+    tileEl.classList.add("no-rotate");
+    return;
+  }
+
+  tileEl.classList.remove("no-rotate");
+  const hoverDirection = getRotationDirectionFromClick(tileEl, event);
+  tileEl.classList.add(hoverDirection === "cw" ? "cursor-cw" : "cursor-ccw");
+}
+
+function refreshHoverCursorFromPointer() {
+  if (
+    state.lastPointerClientX === null
+    || state.lastPointerClientY === null
+    || !Number.isFinite(state.lastPointerClientX)
+    || !Number.isFinite(state.lastPointerClientY)
+  ) {
+    return;
+  }
+
+  const hoveredEl = document.elementFromPoint(state.lastPointerClientX, state.lastPointerClientY);
+  const tileEl = hoveredEl?.closest?.(".tile");
+  if (!tileEl || !boardEl.contains(tileEl)) {
+    return;
+  }
+
+  const tileIndex = Number(tileEl.dataset.index);
+  const cell = Number.isFinite(tileIndex) ? state.board[tileIndex] : null;
+  const canRotate = !!cell && cell.solutionDir !== null;
+  updateTileHoverCursor(
+    tileEl,
+    { clientX: state.lastPointerClientX, clientY: state.lastPointerClientY },
+    canRotate
+  );
 }
 
 function buildLinkOverlay() {
@@ -898,7 +959,7 @@ function startNewPuzzle(cols, rows) {
   updateStatus();
 }
 
-function rotateCell(index, tileEl = null) {
+function rotateCell(index, tileEl = null, rotationDirection = state.rotationDirection) {
   if (state.solved) {
     return;
   }
@@ -912,7 +973,7 @@ function rotateCell(index, tileEl = null) {
   const previousCurrentValues = state.board.map((boardCell) => boardCell.currentAccum);
   const oldDownstreamPath = collectDownstreamPath(index);
 
-  const nextDir = findNextValidDirection(state.board, index, cell.currentDir);
+  const nextDir = findNextValidDirection(state.board, index, cell.currentDir, null, rotationDirection);
 
   if (nextDir === cell.currentDir) {
     animateBlockedTap(tileEl ?? boardEl.querySelector(`.tile[data-index="${index}"]`));
@@ -921,6 +982,7 @@ function rotateCell(index, tileEl = null) {
 
   cell.currentDir = nextDir;
   cell.rotationFromDir = previousDir;
+  cell.rotationDirectionUsed = rotationDirection;
   state.moves += 1;
   movesTextEl.textContent = `Moves: ${state.moves}`;
 
@@ -1009,12 +1071,18 @@ function renderBoard() {
     tile.type = "button";
     tile.className = "tile";
     tile.classList.add(cell.currentAccum === cell.targetAccum ? "solved" : "unsolved");
+    if (cell.solutionDir === null) {
+      tile.classList.add("no-rotate");
+    }
 
     if (
       state.showRotatableHints
       && !state.solved
       && cell.solutionDir !== null
-      && findNextValidDirection(state.board, cell.index, cell.currentDir) !== cell.currentDir
+      && (
+        findNextValidDirection(state.board, cell.index, cell.currentDir, null, "cw") !== cell.currentDir
+        || findNextValidDirection(state.board, cell.index, cell.currentDir, null, "ccw") !== cell.currentDir
+      )
     ) {
       tile.classList.add("rotatable-hint");
     }
@@ -1052,8 +1120,14 @@ function renderBoard() {
     } else {
       direction.style.setProperty("--dir-angle", `${getDirectionAngle(cell.currentDir)}deg`);
       if (cell.rotationFromDir !== undefined) {
-        animateDirectionRotation(direction, cell.rotationFromDir, cell.currentDir);
+        animateDirectionRotation(
+          direction,
+          cell.rotationFromDir,
+          cell.currentDir,
+          cell.rotationDirectionUsed ?? state.rotationDirection
+        );
         delete cell.rotationFromDir;
+        delete cell.rotationDirectionUsed;
       }
     }
 
@@ -1065,12 +1139,31 @@ function renderBoard() {
     }
 
     tile.append(base, direction, current, target);
-    tile.addEventListener("click", () => rotateCell(cell.index, tile));
+    tile.addEventListener("mousemove", (event) => {
+      state.lastPointerClientX = event.clientX;
+      state.lastPointerClientY = event.clientY;
+      updateTileHoverCursor(tile, event, cell.solutionDir !== null);
+    });
+    tile.addEventListener("mouseleave", () => {
+      if (cell.solutionDir === null) {
+        tile.classList.remove("cursor-cw", "cursor-ccw");
+        tile.classList.add("no-rotate");
+        return;
+      }
+      tile.classList.remove("cursor-cw", "cursor-ccw", "no-rotate");
+    });
+    tile.addEventListener("click", (event) => {
+      state.lastPointerClientX = event.clientX;
+      state.lastPointerClientY = event.clientY;
+      const clickRotationDirection = getRotationDirectionFromClick(tile, event);
+      rotateCell(cell.index, tile, clickRotationDirection);
+    });
     frag.appendChild(tile);
   }
 
   boardEl.replaceChildren(frag);
   buildLinkOverlay();
+  refreshHoverCursorFromPointer();
 }
 
 startNewPuzzle(state.cols, state.rows);
@@ -1086,4 +1179,8 @@ applyRotationDirection();
 applyRotatableHintsMode();
 applyValueBadgeMode();
 applyViewMode();
+window.addEventListener("mousemove", (event) => {
+  state.lastPointerClientX = event.clientX;
+  state.lastPointerClientY = event.clientY;
+});
 window.addEventListener("resize", buildLinkOverlay);

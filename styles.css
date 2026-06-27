@@ -278,6 +278,18 @@ button {
   overflow: hidden;
 }
 
+.tile.cursor-cw {
+  cursor: e-resize;
+}
+
+.tile.cursor-ccw {
+  cursor: w-resize;
+}
+
+.tile.no-rotate {
+  cursor: not-allowed;
+}
+
 .board.shape-hex .tile {
   aspect-ratio: 0.866 / 1;
   border-radius: 0;
