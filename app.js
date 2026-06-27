@@ -31,6 +31,43 @@ const currentValueScaleValueEl = document.getElementById("currentValueScaleValue
 const sizeSelect = document.getElementById("sizeSelect");
 const DIR_DEGREES = [0, -45, -90, -135, 180, 135, 90, 45];
 
+function getDirectionAngle(dir) {
+  return dir === null ? 0 : DIR_DEGREES[dir];
+}
+
+function getShortestAngleDelta(fromAngle, toAngle) {
+  let delta = toAngle - fromAngle;
+  while (delta > 180) {
+    delta -= 360;
+  }
+  while (delta < -180) {
+    delta += 360;
+  }
+  return delta;
+}
+
+function animateDirectionRotation(directionEl, fromDir, toDir) {
+  if (!directionEl || fromDir === null || toDir === null || fromDir === toDir) {
+    return;
+  }
+
+  const fromAngle = getDirectionAngle(fromDir);
+  const toAngle = getDirectionAngle(toDir);
+  const delta = getShortestAngleDelta(fromAngle, toAngle);
+  const finalAngle = fromAngle + delta;
+
+  directionEl.animate(
+    [
+      { transform: `translate(-50%, -50%) rotate(${fromAngle}deg)` },
+      { transform: `translate(-50%, -50%) rotate(${finalAngle}deg)` },
+    ],
+    {
+      duration: 220,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+    }
+  );
+}
+
 function applyNumberMode() {
   if (!numberModeToggleBtn) {
     return;
@@ -446,6 +483,8 @@ function rotateCell(index) {
     return;
   }
 
+  const previousDir = cell.currentDir;
+
   let nextDir = (cell.currentDir + 1) % 8;
   let guard = 0;
   while (followDirection(state.cols, state.rows, index, nextDir) === index && guard < 9) {
@@ -454,6 +493,7 @@ function rotateCell(index) {
   }
 
   cell.currentDir = nextDir;
+  cell.rotationFromDir = previousDir;
   state.moves += 1;
   movesTextEl.textContent = `Moves: ${state.moves}`;
 
@@ -541,6 +581,10 @@ function renderBoard() {
       direction.classList.add("sink");
     } else {
       direction.style.setProperty("--dir-angle", `${DIR_DEGREES[cell.currentDir]}deg`);
+      if (cell.rotationFromDir !== undefined) {
+        animateDirectionRotation(direction, cell.rotationFromDir, cell.currentDir);
+        delete cell.rotationFromDir;
+      }
     }
 
     tile.append(base, direction, current, target);
