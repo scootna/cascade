@@ -12,6 +12,7 @@ const state = {
   bounceStrength: 2,
   tileDelay: 55,
   rotationDirection: "cw",
+  useRotationIcons: true,
   showRotatableHints: false,
   lastPointerClientX: null,
   lastPointerClientY: null,
@@ -48,10 +49,14 @@ const bounceStrengthValueEl = document.getElementById("bounceStrengthValue");
 const tileDelaySliderEl = document.getElementById("tileDelaySlider");
 const tileDelayValueEl = document.getElementById("tileDelayValue");
 const tileShapeToggleBtn = document.getElementById("tileShapeToggleBtn");
+const rotationIconsToggleBtn = document.getElementById("rotationIconsToggleBtn");
 const rotatableHintsToggleBtn = document.getElementById("rotatableHintsToggleBtn");
 const sizeSelect = document.getElementById("sizeSelect");
 const SQUARE_DIR_DEGREES = [0, -45, -90, -135, 180, 135, 90, 45];
 const HEX_DIR_DEGREES = [0, -60, -120, 180, 120, 60];
+const rotationCursorEl = document.createElement("div");
+rotationCursorEl.className = "rotation-cursor";
+document.body.appendChild(rotationCursorEl);
 
 function setSettingsModalOpen(isOpen) {
   document.body.classList.toggle("settings-open", isOpen);
@@ -281,6 +286,17 @@ function applyRotationDirection() {
       : "Rotation: Counterclockwise";
 }
 
+function applyRotationIconsMode() {
+  if (rotationIconsToggleBtn) {
+    rotationIconsToggleBtn.textContent = state.useRotationIcons
+      ? "Rotation Icons: On"
+      : "Rotation Icons: Off";
+  }
+  if (!state.useRotationIcons) {
+    hideRotationCursor();
+  }
+}
+
 function applyRotatableHintsMode() {
   if (!rotatableHintsToggleBtn) {
     return;
@@ -407,6 +423,14 @@ if (rotationDirectionToggleBtn) {
   rotationDirectionToggleBtn.addEventListener("click", () => {
     state.rotationDirection = state.rotationDirection === "cw" ? "ccw" : "cw";
     applyRotationDirection();
+  });
+}
+
+if (rotationIconsToggleBtn) {
+  rotationIconsToggleBtn.addEventListener("click", () => {
+    state.useRotationIcons = !state.useRotationIcons;
+    applyRotationIconsMode();
+    renderBoard();
   });
 }
 
@@ -718,21 +742,46 @@ function getRotationDirectionFromClick(tileEl, event) {
   return clickX < rect.width / 2 ? "ccw" : "cw";
 }
 
+function showRotationCursor(direction, clientX, clientY) {
+  if (!rotationCursorEl) {
+    return;
+  }
+  rotationCursorEl.style.left = `${clientX}px`;
+  rotationCursorEl.style.top = `${clientY}px`;
+  rotationCursorEl.classList.remove("cw", "ccw");
+  rotationCursorEl.classList.add(direction === "ccw" ? "ccw" : "cw");
+  rotationCursorEl.classList.add("active");
+}
+
+function hideRotationCursor() {
+  if (!rotationCursorEl) {
+    return;
+  }
+  rotationCursorEl.classList.remove("active", "cw", "ccw");
+}
+
 function updateTileHoverCursor(tileEl, event, canRotate) {
   if (!tileEl) {
     return;
   }
 
-  tileEl.classList.remove("cursor-cw", "cursor-ccw");
+  tileEl.classList.remove("cursor-cw", "cursor-ccw", "cursor-cw-basic", "cursor-ccw-basic");
 
   if (!canRotate) {
     tileEl.classList.add("no-rotate");
+    hideRotationCursor();
     return;
   }
 
   tileEl.classList.remove("no-rotate");
   const hoverDirection = getRotationDirectionFromClick(tileEl, event);
-  tileEl.classList.add(hoverDirection === "cw" ? "cursor-cw" : "cursor-ccw");
+  if (state.useRotationIcons) {
+    tileEl.classList.add(hoverDirection === "cw" ? "cursor-cw" : "cursor-ccw");
+    showRotationCursor(hoverDirection, event.clientX, event.clientY);
+  } else {
+    tileEl.classList.add(hoverDirection === "cw" ? "cursor-cw-basic" : "cursor-ccw-basic");
+    hideRotationCursor();
+  }
 }
 
 function refreshHoverCursorFromPointer() {
@@ -748,6 +797,7 @@ function refreshHoverCursorFromPointer() {
   const hoveredEl = document.elementFromPoint(state.lastPointerClientX, state.lastPointerClientY);
   const tileEl = hoveredEl?.closest?.(".tile");
   if (!tileEl || !boardEl.contains(tileEl)) {
+    hideRotationCursor();
     return;
   }
 
@@ -1146,11 +1196,13 @@ function renderBoard() {
     });
     tile.addEventListener("mouseleave", () => {
       if (cell.solutionDir === null) {
-        tile.classList.remove("cursor-cw", "cursor-ccw");
+        tile.classList.remove("cursor-cw", "cursor-ccw", "cursor-cw-basic", "cursor-ccw-basic");
         tile.classList.add("no-rotate");
+        hideRotationCursor();
         return;
       }
-      tile.classList.remove("cursor-cw", "cursor-ccw", "no-rotate");
+      tile.classList.remove("cursor-cw", "cursor-ccw", "cursor-cw-basic", "cursor-ccw-basic", "no-rotate");
+      hideRotationCursor();
     });
     tile.addEventListener("click", (event) => {
       state.lastPointerClientX = event.clientX;
@@ -1176,11 +1228,18 @@ applyBounceStrength();
 applyTileDelay();
 applyNumberMode();
 applyRotationDirection();
+applyRotationIconsMode();
 applyRotatableHintsMode();
 applyValueBadgeMode();
 applyViewMode();
 window.addEventListener("mousemove", (event) => {
   state.lastPointerClientX = event.clientX;
   state.lastPointerClientY = event.clientY;
+
+  const hoveredEl = document.elementFromPoint(event.clientX, event.clientY);
+  const tileEl = hoveredEl?.closest?.(".tile");
+  if (!tileEl || !boardEl.contains(tileEl)) {
+    hideRotationCursor();
+  }
 });
 window.addEventListener("resize", buildLinkOverlay);
