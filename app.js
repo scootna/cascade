@@ -27,9 +27,12 @@ const state = {
   lastPointerClientY: null,
   lockedTileSize: null,
   lastCountedTileIndex: null,
+  initialBoardSnapshot: null,
   board: [],
   moves: 0,
   solved: false,
+  shareIncludeCompletedStats: false,
+  loadedBenchmarkStats: null,
   timerActive: false,
   timerStartAtMs: null,
   timerElapsedMs: 0,
@@ -54,6 +57,8 @@ const lessonSettingsModalEl = document.getElementById("lessonSettingsModal");
 const statusTextEl = document.getElementById("statusText");
 const movesTextEl = document.getElementById("movesText");
 const timerTextEl = document.getElementById("timerText");
+const benchmarkTextEl = document.getElementById("benchmarkText");
+const boardStatusShareBtn = document.getElementById("boardStatusShareBtn");
 const postWinNewGameBtn = document.getElementById("postWinNewGameBtn");
 const helpToggleBtn = document.getElementById("helpToggleBtn");
 const helpSectionsEl = document.getElementById("helpSections");
@@ -219,6 +224,10 @@ function setSettingsDrawerOpen(drawerName, isOpen) {
   const shareOpen = drawerName === "share" ? isOpen : false;
   const lessonOpen = drawerName === "lesson" ? isOpen : false;
 
+  if (!shareOpen) {
+    state.shareIncludeCompletedStats = false;
+  }
+
   document.body.classList.toggle("display-settings-open", displayOpen);
   document.body.classList.toggle("difficulty-settings-open", difficultyOpen);
   document.body.classList.toggle("share-settings-open", shareOpen);
@@ -277,17 +286,93 @@ function decodeBase64Url(input) {
   return atob(`${normalized}${"=".repeat(padLength)}`);
 }
 
+function getCompletedStatsPayload() {
+  return {
+    m: state.moves,
+    t: Math.max(0, Math.floor(state.timerElapsedMs)),
+  };
+}
+
+function encodeCompletedStatsPayload(payload) {
+  return encodeBase64Url(JSON.stringify(payload));
+}
+
+function decodeCompletedStatsPayload(encoded) {
+  const rawJson = decodeBase64Url(encoded);
+  const parsed = JSON.parse(rawJson);
+  const moves = Number(parsed?.m);
+  const elapsedMs = Number(parsed?.t);
+  if (
+    !Number.isInteger(moves)
+    || moves < 0
+    || !Number.isFinite(elapsedMs)
+    || elapsedMs < 0
+  ) {
+    throw new Error("Invalid completed stats payload");
+  }
+  return {
+    m: moves,
+    t: Math.floor(elapsedMs),
+  };
+}
+
+function formatSignedMoveDelta(delta) {
+  if (delta === 0) {
+    return "same moves";
+  }
+  const sign = delta > 0 ? "+" : "-";
+  return `${sign}${Math.abs(delta)} moves`;
+}
+
+function formatSignedTimeDelta(deltaMs) {
+  if (deltaMs === 0) {
+    return "same time";
+  }
+  const sign = deltaMs > 0 ? "+" : "-";
+  return `${sign}${formatTimer(Math.abs(deltaMs))}`;
+}
+
+function formatBenchmarkComparison() {
+  if (!state.loadedBenchmarkStats) {
+    return "";
+  }
+
+  const moveDelta = state.moves - state.loadedBenchmarkStats.m;
+  const timeDelta = state.timerElapsedMs - state.loadedBenchmarkStats.t;
+  return ` Benchmark ${state.loadedBenchmarkStats.m} moves, ${formatTimer(state.loadedBenchmarkStats.t)}. Delta ${formatSignedMoveDelta(moveDelta)}, ${formatSignedTimeDelta(timeDelta)}.`;
+}
+
+function renderBenchmarkComparison() {
+  if (!benchmarkTextEl) {
+    return;
+  }
+  const hasBenchmarks = !!state.loadedBenchmarkStats
+    && (state.loadedBenchmarkStats.m > 0 || state.loadedBenchmarkStats.t > 0);
+  if (!hasBenchmarks) {
+    benchmarkTextEl.hidden = true;
+    benchmarkTextEl.textContent = "";
+    return;
+  }
+  const moveDelta = state.moves - state.loadedBenchmarkStats.m;
+  const timeDelta = state.timerElapsedMs - state.loadedBenchmarkStats.t;
+  benchmarkTextEl.hidden = false;
+  benchmarkTextEl.textContent = `Benchmark: ${state.loadedBenchmarkStats.m} moves, ${formatTimer(state.loadedBenchmarkStats.t)}. Current: ${state.moves} moves, ${formatTimer(state.timerElapsedMs)}. Delta: ${formatSignedMoveDelta(moveDelta)}, ${formatSignedTimeDelta(timeDelta)}.`;
+}
+
 function getDirectionCountForShape(shape) {
   return shape === "hex" ? 6 : 8;
 }
 
 function getBoardSharePayload() {
+  const snapshotTiles = Array.isArray(state.initialBoardSnapshot)
+    ? state.initialBoardSnapshot
+    : state.board.map((cell) => [cell.baseFlow, cell.targetAccum, cell.currentDir]);
   return {
     v: 1,
     c: state.cols,
     r: state.rows,
     s: state.tileShape,
-    t: state.board.map((cell) => [cell.baseFlow, cell.targetAccum, cell.currentDir]),
+    t: snapshotTiles,
   };
 }
 
@@ -351,6 +436,7 @@ function loadBoardFromPayload(payload) {
   state.rows = rows;
   state.tileShape = shape;
   state.board = board;
+  state.initialBoardSnapshot = board.map((cell) => [cell.baseFlow, cell.targetAccum, cell.currentDir]);
   state.solved = false;
   state.moves = 0;
   state.lastCountedTileIndex = null;
@@ -389,8 +475,22 @@ function tryLoadBoardFromUrl() {
   try {
     const payload = decodeBoardPayload(encoded);
     loadBoardFromPayload(payload);
+    const encodedResult = params.get("result");
+    if (encodedResult) {
+      try {
+        state.loadedBenchmarkStats = decodeCompletedStatsPayload(encodedResult);
+      } catch (resultError) {
+        console.warn("Invalid result parameter", resultError);
+        state.loadedBenchmarkStats = null;
+      }
+    } else {
+      state.loadedBenchmarkStats = null;
+    }
+    renderBenchmarkComparison();
     if (shareBoardStatusEl) {
-      shareBoardStatusEl.textContent = "Loaded board from URL.";
+      shareBoardStatusEl.textContent = state.loadedBenchmarkStats
+        ? "Loaded board and benchmark from URL."
+        : "Loaded board from URL.";
     }
     return true;
   } catch (error) {
@@ -407,6 +507,12 @@ function buildShareUrlFromCurrentBoard() {
   const encoded = encodeBoardPayload(payload);
   const shareUrl = new URL(window.location.href);
   shareUrl.searchParams.set("board", encoded);
+  if (state.shareIncludeCompletedStats && state.solved) {
+    const resultEncoded = encodeCompletedStatsPayload(getCompletedStatsPayload());
+    shareUrl.searchParams.set("result", resultEncoded);
+  } else {
+    shareUrl.searchParams.delete("result");
+  }
   return shareUrl;
 }
 
@@ -452,6 +558,7 @@ function renderTimer() {
     return;
   }
   timerTextEl.textContent = `Time: ${formatTimer(state.timerElapsedMs)}`;
+  renderBenchmarkComparison();
 }
 
 function stopGameTimer() {
@@ -1214,6 +1321,16 @@ if (shareBoardBtn) {
   });
 }
 
+if (boardStatusShareBtn) {
+  boardStatusShareBtn.addEventListener("click", () => {
+    state.shareIncludeCompletedStats = true;
+    setSettingsDrawerOpen("share", true);
+    if (shareBoardStatusEl) {
+      shareBoardStatusEl.textContent = "Sharing board with your completed run stats.";
+    }
+  });
+}
+
 if (rotatableHintsToggleBtn) {
   rotatableHintsToggleBtn.addEventListener("click", () => {
     state.showRotatableHints = !state.showRotatableHints;
@@ -1351,6 +1468,7 @@ if (difficultySettingsToggleBtn) {
 
 if (shareSettingsToggleBtn) {
   shareSettingsToggleBtn.addEventListener("click", () => {
+    state.shareIncludeCompletedStats = false;
     const shouldOpen = !document.body.classList.contains("share-settings-open");
     setSettingsDrawerOpen("share", shouldOpen);
   });
@@ -1943,9 +2061,15 @@ function startNewPuzzle(cols, rows) {
   state.cols = cols;
   state.rows = rows;
   state.solved = false;
+  state.initialBoardSnapshot = null;
+  state.shareIncludeCompletedStats = false;
+  state.loadedBenchmarkStats = null;
   state.moves = 0;
   state.lastCountedTileIndex = null;
   movesTextEl.textContent = "Moves: 0";
+  if (boardStatusShareBtn) {
+    boardStatusShareBtn.hidden = true;
+  }
   resetGameTimer();
 
   const board = [];
@@ -2003,6 +2127,7 @@ function startNewPuzzle(cols, rows) {
   }
 
   state.board = board;
+  state.initialBoardSnapshot = board.map((cell) => [cell.baseFlow, cell.targetAccum, cell.currentDir]);
   renderBoard();
   updateStatus();
 }
@@ -2091,7 +2216,10 @@ function updateStatus() {
   }
 
   if (solvedNow) {
-    statusTextEl.textContent = `Solved in ${state.moves} moves. New Puzzle for another watershed.`;
+    statusTextEl.textContent = `Solved in ${state.moves} moves. New Puzzle for another watershed.${formatBenchmarkComparison()}`;
+    if (boardStatusShareBtn) {
+      boardStatusShareBtn.hidden = false;
+    }
   } else {
     const remaining = state.board.filter((c) => c.currentAccum !== c.targetAccum).length;
     const crossingCount = state.disallowCrossingFlows ? getCrossingTileIndices(state.board).size : 0;
@@ -2102,8 +2230,12 @@ function updateStatus() {
     } else {
       statusTextEl.textContent = `${remaining} tiles still mismatched.`;
     }
+    if (boardStatusShareBtn) {
+      boardStatusShareBtn.hidden = true;
+    }
   }
 
+  renderBenchmarkComparison();
   renderLessonStudio();
 }
 
