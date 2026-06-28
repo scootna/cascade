@@ -36,6 +36,9 @@ const state = {
   timerActive: false,
   timerStartAtMs: null,
   timerElapsedMs: 0,
+  tutorialActive: false,
+  tutorialStep: 0,
+  tutorialExpectedTileIndex: null,
 };
 
 const boardEl = document.getElementById("board");
@@ -62,6 +65,11 @@ const boardStatusShareBtn = document.getElementById("boardStatusShareBtn");
 const postWinNewGameBtn = document.getElementById("postWinNewGameBtn");
 const helpToggleBtn = document.getElementById("helpToggleBtn");
 const helpSectionsEl = document.getElementById("helpSections");
+const tutorialStartBtn = document.getElementById("tutorialStartBtn");
+const tutorialNextBtn = document.getElementById("tutorialNextBtn");
+const tutorialExitBtn = document.getElementById("tutorialExitBtn");
+const tutorialStepLabelEl = document.getElementById("tutorialStepLabel");
+const tutorialStepTextEl = document.getElementById("tutorialStepText");
 const rotationDirectionToggleBtn = document.getElementById("rotationDirectionToggleBtn");
 const valueBadgeToggleBtn = document.getElementById("valueBadgeToggleBtn");
 const numberModeToggleBtn = document.getElementById("numberModeToggleBtn");
@@ -217,6 +225,53 @@ const LESSON_LIBRARY = {
     ],
   },
 };
+
+const TUTORIAL_BOARD_PAYLOAD = {
+  c: 2,
+  r: 2,
+  s: "square",
+  t: [
+    [1, 1, 0],
+    [1, 3, null],
+    [1, 1, 0],
+    [1, 1, null],
+  ],
+};
+
+const TUTORIAL_STEPS = [
+  {
+    label: "Step 1 of 4",
+    text: "This mini 2x2 board shows the core mechanic. Each tile has a current center value (base value + incoming flow from neighboring tiles), and a target in the corner.",
+    status: "Tutorial: Every tile combines its base runoff with incoming upstream flow.",
+    focus: [0, 1, 2, 3],
+    target: [1],
+  },
+  {
+    label: "Step 2 of 4",
+    text: "Observe the top right tile. Its target is 3, so it needs its own base plus two incoming streams.",
+    status: "Tutorial: The top right tile should collect 3 by receiving flow from the 2 left tiles.",
+    focus: [0, 1, 2, 3],
+    target: [1],
+  },
+  {
+    label: "Step 3 of 4",
+    text: "Now rotate the bottom left tile until its arrow feeds the top right tile. Notice how the value decreases in the bottom right tile and increases in the top right tile.",
+    status: "Tutorial: Rotate the bottom left tile until the top right tile reaches target 3 and the bottom right tile reaches target 1.",
+    focus: [1, 2, 3],
+    target: [1],
+    waitForRotate: true,
+    expectedRotateIndex: 2,
+  },
+  {
+    label: "Step 4 of 4",
+    text: "Great. That reroute solved the board. You just used one rotation to fix multiple totals.",
+    status: "Tutorial complete: one arrow change rerouted flow and solved the board.",
+    focus: [1, 2, 3],
+    target: [1],
+    final: true,
+    allowFreePlay: true,
+  },
+];
 
 function setSettingsDrawerOpen(drawerName, isOpen) {
   const displayOpen = drawerName === "display" ? isOpen : false;
@@ -1022,6 +1077,149 @@ function applyHelpVisibility() {
   }
 }
 
+function getActiveTutorialStep() {
+  if (!state.tutorialActive) {
+    return null;
+  }
+  const index = Math.max(0, Math.min(TUTORIAL_STEPS.length - 1, state.tutorialStep));
+  return TUTORIAL_STEPS[index];
+}
+
+function renderTutorialPanel() {
+  if (!tutorialStepLabelEl || !tutorialStepTextEl || !tutorialStartBtn || !tutorialNextBtn || !tutorialExitBtn) {
+    return;
+  }
+
+  const step = getActiveTutorialStep();
+  if (!step) {
+    tutorialStepLabelEl.textContent = "2x2 Practice";
+    tutorialStepTextEl.textContent = "Start a short guided run that highlights flow paths and asks you to fix one mismatch.";
+    tutorialStartBtn.hidden = false;
+    tutorialNextBtn.hidden = true;
+    tutorialExitBtn.hidden = true;
+    return;
+  }
+
+  tutorialStepLabelEl.textContent = step.label;
+  tutorialStepTextEl.textContent = step.text;
+  tutorialStartBtn.hidden = true;
+  tutorialExitBtn.hidden = false;
+  tutorialNextBtn.hidden = false;
+  tutorialNextBtn.disabled = !!step.waitForRotate;
+  tutorialNextBtn.textContent = step.final ? "Finish Tutorial" : "Next";
+}
+
+function applyTutorialStatusMessage() {
+  if (!state.tutorialActive || !statusTextEl) {
+    return;
+  }
+  const step = getActiveTutorialStep();
+  if (!step) {
+    return;
+  }
+  statusTextEl.textContent = step.status;
+}
+
+function setTutorialStep(stepIndex) {
+  if (!state.tutorialActive) {
+    return;
+  }
+  const boundedIndex = Math.max(0, Math.min(TUTORIAL_STEPS.length - 1, stepIndex));
+  state.tutorialStep = boundedIndex;
+  const step = getActiveTutorialStep();
+  state.tutorialExpectedTileIndex = Number.isInteger(step?.expectedRotateIndex)
+    ? step.expectedRotateIndex
+    : null;
+  renderTutorialPanel();
+  renderBoard();
+  applyTutorialStatusMessage();
+}
+
+function startGuidedTutorial() {
+  state.tutorialActive = true;
+  state.tutorialStep = 0;
+  state.tutorialExpectedTileIndex = null;
+  state.loadedBenchmarkStats = null;
+  state.shareIncludeCompletedStats = false;
+  state.disallowCrossingFlows = false;
+  state.tileShape = "square";
+  state.hideBaseAndMatchedCurrent = true;
+
+  applyCrossingFlowMode();
+  applyTileShape();
+  applyNumberMode();
+
+  state.helpOpen = true;
+  applyHelpVisibility();
+
+  loadBoardFromPayload(TUTORIAL_BOARD_PAYLOAD);
+  setTutorialStep(0);
+}
+
+function endGuidedTutorial(restorePuzzle = true) {
+  state.tutorialActive = false;
+  state.tutorialStep = 0;
+  state.tutorialExpectedTileIndex = null;
+  renderTutorialPanel();
+
+  if (restorePuzzle) {
+    state.helpOpen = false;
+    applyHelpVisibility();
+    const selectedGrid = sizeSelect ? sizeSelect.value : "4x4";
+    const grid = parseGridValue(selectedGrid);
+    startNewPuzzle(grid.cols, grid.rows);
+    return;
+  }
+
+  renderBoard();
+  updateStatus();
+}
+
+function advanceTutorialStep() {
+  const step = getActiveTutorialStep();
+  if (!step || step.waitForRotate) {
+    return;
+  }
+  if (step.final) {
+    endGuidedTutorial(true);
+    return;
+  }
+  setTutorialStep(state.tutorialStep + 1);
+}
+
+function canRotateTutorialTile(tileIndex, tileEl) {
+  const step = getActiveTutorialStep();
+  if (!step || step.allowFreePlay) {
+    return true;
+  }
+  if (!step.waitForRotate) {
+    animateBlockedTap(tileEl);
+    applyTutorialStatusMessage();
+    return false;
+  }
+  if (state.tutorialExpectedTileIndex !== null && tileIndex !== state.tutorialExpectedTileIndex) {
+    animateBlockedTap(tileEl);
+    statusTextEl.textContent = `Tutorial: rotate Tile ${state.tutorialExpectedTileIndex}.`;
+    return false;
+  }
+  return true;
+}
+
+function handleTutorialAfterRotation(rotatedTileIndex) {
+  const step = getActiveTutorialStep();
+  if (!step || !step.waitForRotate) {
+    return;
+  }
+  if (state.tutorialExpectedTileIndex !== null && rotatedTileIndex !== state.tutorialExpectedTileIndex) {
+    return;
+  }
+  if (isSolved()) {
+    setTutorialStep(state.tutorialStep + 1);
+  } else {
+    applyTutorialStatusMessage();
+  }
+}
+
 function applyColorPalette() {
   document.body.dataset.palette = state.colorPalette;
   if (paletteSelectEl) {
@@ -1268,6 +1466,24 @@ if (helpToggleBtn) {
   helpToggleBtn.addEventListener("click", () => {
     state.helpOpen = !state.helpOpen;
     applyHelpVisibility();
+  });
+}
+
+if (tutorialStartBtn) {
+  tutorialStartBtn.addEventListener("click", () => {
+    startGuidedTutorial();
+  });
+}
+
+if (tutorialNextBtn) {
+  tutorialNextBtn.addEventListener("click", () => {
+    advanceTutorialStep();
+  });
+}
+
+if (tutorialExitBtn) {
+  tutorialExitBtn.addEventListener("click", () => {
+    endGuidedTutorial(true);
   });
 }
 
@@ -2066,6 +2282,9 @@ function scrambleDirections(board) {
 function startNewPuzzle(cols, rows) {
   state.cols = cols;
   state.rows = rows;
+  state.tutorialActive = false;
+  state.tutorialStep = 0;
+  state.tutorialExpectedTileIndex = null;
   state.solved = false;
   state.initialBoardSnapshot = null;
   state.shareIncludeCompletedStats = false;
@@ -2136,6 +2355,7 @@ function startNewPuzzle(cols, rows) {
   state.initialBoardSnapshot = board.map((cell) => [cell.baseFlow, cell.targetAccum, cell.currentDir]);
   renderBoard();
   updateStatus();
+  renderTutorialPanel();
 }
 
 function rotateCell(index, tileEl = null, rotationDirection = state.rotationDirection) {
@@ -2195,6 +2415,7 @@ function rotateCell(index, tileEl = null, rotationDirection = state.rotationDire
 
   renderBoard();
   updateStatus();
+  handleTutorialAfterRotation(index);
 }
 
 function isSolved() {
@@ -2241,11 +2462,21 @@ function updateStatus() {
     }
   }
 
+  if (state.tutorialActive) {
+    applyTutorialStatusMessage();
+    if (boardStatusShareBtn) {
+      boardStatusShareBtn.hidden = true;
+    }
+  }
+
   renderBenchmarkComparison();
   renderLessonStudio();
 }
 
 function renderBoard() {
+  const tutorialStep = getActiveTutorialStep();
+  boardEl.classList.toggle("tutorial-active", !!tutorialStep && !tutorialStep.allowFreePlay);
+
   const stageWidth = Math.max(1, boardStageEl?.clientWidth ?? 0);
   const stageHeight = Math.max(1, boardStageEl?.clientHeight ?? 0);
   const boardStyles = getComputedStyle(boardEl);
@@ -2313,6 +2544,25 @@ function renderBoard() {
     }
     if (cell.solutionDir === null) {
       tile.classList.add("no-rotate");
+    }
+
+    if (tutorialStep) {
+      const focused = Array.isArray(tutorialStep.focus) && tutorialStep.focus.includes(cell.index);
+      if (focused) {
+        tile.classList.add("tutorial-focus");
+      } else if (!tutorialStep.allowFreePlay) {
+        tile.classList.add("tutorial-muted");
+      }
+      if (Array.isArray(tutorialStep.target) && tutorialStep.target.includes(cell.index)) {
+        tile.classList.add("tutorial-target");
+      }
+      if (
+        tutorialStep.waitForRotate
+        && state.tutorialExpectedTileIndex !== null
+        && cell.index === state.tutorialExpectedTileIndex
+      ) {
+        tile.classList.add("tutorial-action");
+      }
     }
 
     if (
@@ -2397,7 +2647,12 @@ function renderBoard() {
     tile.addEventListener("click", (event) => {
       state.lastPointerClientX = event.clientX;
       state.lastPointerClientY = event.clientY;
-      startGameTimer();
+      if (state.tutorialActive && !canRotateTutorialTile(cell.index, tile)) {
+        return;
+      }
+      if (!state.tutorialActive) {
+        startGameTimer();
+      }
       const clickRotationDirection = getRotationDirectionFromClick(tile, event);
       rotateCell(cell.index, tile, clickRotationDirection);
     });
@@ -2426,6 +2681,7 @@ applyRotationDirection();
 applyRotationIconsMode();
 applyFlowSoundMode();
 applyHelpVisibility();
+renderTutorialPanel();
 applyColorPalette();
 applyNegativeBaseMode();
 applyCrossingFlowMode();

@@ -165,26 +165,38 @@
       </section>
     </aside>
 
+    <section id="helpSections" class="help-sections" hidden>
+      <div class="help-card">
+        <section class="help-panel">
+          <h2>How It Works</h2>
+          <p>Each tile has a base runoff. Water follows that tile's arrow to one neighboring tile.</p>
+          <p>The large center number is the base runoff plus current accumulated flow from neighboring tiles.</p>
+          <p>The bottom-right number is the target accumulated flow.</p>
+          <p>When all current values equal targets, you win.</p>
+        </section>
+
+        <section class="legend">
+          <div><span class="dot dot-solved"></span> solved tile</div>
+          <div><span class="dot dot-unsolved"></span> unsolved tile</div>
+          <div>Click any tile to rotate its outflow direction in the selected rotation mode (left side of tile for counterclockwise, right side for clockwise). Mobile touch controls always rotate clockwise.<br>When tiles are in a loop, those tiles are highlighted.</div>
+        </section>
+
+        <section class="help-panel tutorial-panel" aria-live="polite">
+          <h2>Guided Tutorial</h2>
+          <p id="tutorialStepLabel" class="tutorial-step-label">2x2 Practice</p>
+          <p id="tutorialStepText">Start a short guided run that highlights flow paths and asks you to fix one mismatch.</p>
+          <div class="tutorial-controls">
+            <button id="tutorialStartBtn" type="button">Run Guided Tutorial</button>
+            <button id="tutorialNextBtn" type="button" hidden>Next</button>
+            <button id="tutorialExitBtn" type="button" hidden>Exit Tutorial</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
     <section id="boardStage" class="board-stage show-arrows">
       <svg id="linkOverlay" class="link-overlay" aria-hidden="true"></svg>
       <section id="board" class="board" aria-label="Flow puzzle board"></section>
-      <section id="helpSections" class="help-sections" hidden>
-        <div class="help-card">
-          <section class="help-panel">
-            <h2>How It Works</h2>
-            <p>Each tile has a base runoff. Water follows that tile's arrow to one neighboring tile.</p>
-            <p>The large center number is the base runoff plus current accumulated flow from neighboring tiles.</p>
-            <p>The bottom-right number is the target accumulated flow.</p>
-            <p>When all current values equal targets, you win.</p>
-          </section>
-
-          <section class="legend">
-            <div><span class="dot dot-solved"></span> solved tile</div>
-            <div><span class="dot dot-unsolved"></span> unsolved tile</div>
-            <div>Click any tile to rotate its outflow direction in the selected rotation mode (left side of tile for counterclockwise, right side for clockwise). Mobile touch controls always rotate clockwise.<br>When tiles are in a loop, those tiles are highlighted.</div>
-          </section>
-        </div>
-      </section>
     </section>
 
     <section class="status-row board-status" aria-live="polite">
