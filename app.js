@@ -926,6 +926,60 @@ function wouldCreateCycle(board, startIndex, candidateDir) {
   }
 }
 
+function getLoopTileIndices(board) {
+  const n = board.length;
+  const nextIndices = new Array(n).fill(null);
+  for (let i = 0; i < n; i += 1) {
+    const cell = board[i];
+    if (!cell || cell.currentDir === null) {
+      continue;
+    }
+    const nextIndex = followDirection(state.cols, state.rows, i, cell.currentDir);
+    if (nextIndex !== i) {
+      nextIndices[i] = nextIndex;
+    }
+  }
+
+  const visitState = new Array(n).fill(0);
+  const stack = [];
+  const loopIndices = new Set();
+
+  function visit(index) {
+    if (index === null || index < 0 || index >= n) {
+      return;
+    }
+    if (visitState[index] === 2) {
+      return;
+    }
+    if (visitState[index] === 1) {
+      const cycleStart = stack.lastIndexOf(index);
+      if (cycleStart !== -1) {
+        for (let i = cycleStart; i < stack.length; i += 1) {
+          loopIndices.add(stack[i]);
+        }
+      }
+      return;
+    }
+
+    visitState[index] = 1;
+    stack.push(index);
+    const nextIndex = nextIndices[index];
+    if (nextIndex !== null) {
+      visit(nextIndex);
+    }
+    stack.pop();
+    visitState[index] = 2;
+  }
+
+  for (let i = 0; i < n; i += 1) {
+    if (visitState[i] === 0) {
+      visit(i);
+    }
+  }
+
+  return loopIndices;
+}
+
 function shuffledDirections() {
   const dirs = Array.from({ length: getDirectionCount() }, (_, i) => i);
   for (let i = dirs.length - 1; i > 0; i -= 1) {
@@ -953,9 +1007,7 @@ function findNextValidDirection(
     if (followDirection(state.cols, state.rows, cellIndex, candidateDir) === cellIndex) {
       continue;
     }
-    if (!wouldCreateCycle(board, cellIndex, candidateDir)) {
-      return candidateDir;
-    }
+    return candidateDir;
   }
   return currentDir;
 }
@@ -1368,12 +1420,17 @@ function renderBoard() {
 
   applyArrowScale();
 
+  const loopTileIndices = getLoopTileIndices(state.board);
+
   const frag = document.createDocumentFragment();
   for (const cell of state.board) {
     const tile = document.createElement("button");
     tile.type = "button";
     tile.className = "tile";
     tile.classList.add(cell.currentAccum === cell.targetAccum ? "solved" : "unsolved");
+    if (loopTileIndices.has(cell.index)) {
+      tile.classList.add("loop");
+    }
     if (cell.solutionDir === null) {
       tile.classList.add("no-rotate");
     }
