@@ -15,6 +15,7 @@ const state = {
   useRotationIcons: false,
   useFlowSound: true,
   colorPalette: "coastal",
+  helpOpen: false,
   allowNegativeBaseRunoff: false,
   baseTileAccumulation: 3,
   showRotatableHints: false,
@@ -40,6 +41,8 @@ const difficultySettingsModalEl = document.getElementById("difficultySettingsMod
 const statusTextEl = document.getElementById("statusText");
 const movesTextEl = document.getElementById("movesText");
 const postWinNewGameBtn = document.getElementById("postWinNewGameBtn");
+const helpToggleBtn = document.getElementById("helpToggleBtn");
+const helpSectionsEl = document.getElementById("helpSections");
 const rotationDirectionToggleBtn = document.getElementById("rotationDirectionToggleBtn");
 const valueBadgeToggleBtn = document.getElementById("valueBadgeToggleBtn");
 const numberModeToggleBtn = document.getElementById("numberModeToggleBtn");
@@ -499,6 +502,16 @@ function applyFlowSoundMode() {
     : "Flow Sound: Off";
 }
 
+function applyHelpVisibility() {
+  if (helpSectionsEl) {
+    helpSectionsEl.hidden = !state.helpOpen;
+  }
+  if (helpToggleBtn) {
+    helpToggleBtn.textContent = state.helpOpen ? "Hide Help" : "Help";
+    helpToggleBtn.setAttribute("aria-expanded", state.helpOpen ? "true" : "false");
+  }
+}
+
 function applyColorPalette() {
   document.body.dataset.palette = state.colorPalette;
   if (paletteSelectEl) {
@@ -644,6 +657,13 @@ if (postWinNewGameBtn) {
   postWinNewGameBtn.addEventListener("click", () => {
     const grid = parseGridValue(sizeSelect.value);
     startNewPuzzle(grid.cols, grid.rows);
+  });
+}
+
+if (helpToggleBtn) {
+  helpToggleBtn.addEventListener("click", () => {
+    state.helpOpen = !state.helpOpen;
+    applyHelpVisibility();
   });
 }
 
@@ -1620,6 +1640,7 @@ applyNumberMode();
 applyRotationDirection();
 applyRotationIconsMode();
 applyFlowSoundMode();
+applyHelpVisibility();
 applyColorPalette();
 applyNegativeBaseMode();
 applyBaseTileAccumulationMode();

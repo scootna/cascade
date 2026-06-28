@@ -17,9 +17,10 @@
         <p>Rotate tiles to route water runoff so every tile matches its target accumulation.</p>
       </div>
       <div class="topbar-actions">
-        <button id="postWinNewGameBtn" type="button">New Game</button>
+        <button id="helpToggleBtn" type="button" aria-expanded="false" aria-controls="helpSections">Help</button>
         <button id="displaySettingsToggleBtn" type="button">Display</button>
         <button id="difficultySettingsToggleBtn" type="button">Difficulty</button>
+        <button id="postWinNewGameBtn" type="button">New Game</button>
       </div>
     </header>
 
@@ -102,25 +103,28 @@
     <section id="boardStage" class="board-stage show-arrows">
       <svg id="linkOverlay" class="link-overlay" aria-hidden="true"></svg>
       <section id="board" class="board" aria-label="Flow puzzle board"></section>
-    </section>
+      <section id="helpSections" class="help-sections" hidden>
+        <div class="help-card">
+          <section class="help-panel">
+            <h2>How It Works</h2>
+            <p>Each tile has a base runoff. Water follows that tile's arrow to one neighboring tile.</p>
+            <p>The large center number is the base runoff plus current accumulated flow from neighboring tiles.</p>
+            <p>The bottom-right number is the target accumulated flow.</p>
+            <p>When all current values equal targets, you win.</p>
+          </section>
 
-    <section class="help-panel">
-      <h2>How It Works</h2>
-      <p>Each tile has a base runoff. Water follows that tile's arrow to one neighboring tile.</p>
-      <p>The large center number is the base runoff plus current accumulated flow from neighboring tiles.</p>
-      <p>The bottom-right number is the target accumulated flow.</p>
-      <p>When all current values equal targets, you win.</p>
-    </section>
+          <section class="legend">
+            <div><span class="dot dot-solved"></span> solved tile</div>
+            <div><span class="dot dot-unsolved"></span> unsolved tile</div>
+            <div>Click any tile to rotate its outflow direction in the selected rotation mode (left side of tile for counterclockwise, right side for clockwise).<br>When tiles are in a loop, those tiles are highlighted.</div>
+          </section>
 
-    <section class="legend">
-      <div><span class="dot dot-solved"></span> solved tile</div>
-      <div><span class="dot dot-unsolved"></span> unsolved tile</div>
-      <div>Click any tile to rotate its outflow direction in the selected rotation mode (left side of tile for counterclockwise, right side for clockwise).<br>When tiles are in a loop, those tiles are highlighted.</div>
-    </section>
-
-    <section class="status-row">
-      <div id="statusText">Build all accumulations to match targets.</div>
-      <div id="movesText">Moves: 0</div>
+          <section class="status-row">
+            <div id="statusText">Build all accumulations to match targets.</div>
+            <div id="movesText">Moves: 0</div>
+          </section>
+        </div>
+      </section>
     </section>
   </main>
 

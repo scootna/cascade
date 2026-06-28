@@ -497,6 +497,51 @@ input[type="range"]:focus-visible {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
+.help-sections {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(19, 34, 43, 0.24);
+}
+
+.help-sections[hidden] {
+  display: none;
+}
+
+.help-card {
+  width: min(680px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 0.1rem 0.1rem 0.35rem;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.6), transparent 18%),
+    color-mix(in srgb, var(--panel) 92%, white 8%);
+  border: 1px solid color-mix(in srgb, var(--ui-border) 88%, white 12%);
+  box-shadow: 0 22px 48px rgba(16, 38, 56, 0.22);
+}
+
+.help-sections .help-panel,
+.help-sections .legend,
+.help-sections .status-row {
+  margin-top: 0.75rem;
+}
+
+.help-sections .help-panel:first-child {
+  margin-top: 0;
+}
+
+.help-sections .help-panel,
+.help-sections .legend,
+.help-sections .status-row {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
 .legend,
 .status-row {
   display: flex;
@@ -561,7 +606,8 @@ input[type="range"]:focus-visible {
 }
 
 #postWinNewGameBtn {
-  min-width: 126px;
+  width: auto;
+  min-width: 0;
 }
 
 @keyframes solved-stage-glow {
@@ -960,7 +1006,6 @@ body[data-palette="forest"] .app-shell {
 
   .help-panel {
     display: block;
-    margin-top: 0.55rem;
     padding: 0.5rem 0.65rem;
     font-size: 0.88rem;
   }
@@ -980,6 +1025,15 @@ body[data-palette="forest"] .app-shell {
     align-items: flex-start;
   }
 
+  .help-sections {
+    padding: 0.45rem;
+  }
+
+  .help-card {
+    width: 100%;
+    border-radius: 16px;
+  }
+
   .board-stage {
     min-height: 0;
   }
@@ -989,7 +1043,7 @@ body[data-palette="forest"] .app-shell {
   }
 
   #postWinNewGameBtn {
-    width: min(320px, 92vw);
+    width: auto;
   }
 }
 
@@ -1008,6 +1062,10 @@ body[data-palette="forest"] .app-shell {
 
   .help-panel {
     display: block;
+  }
+
+  .help-sections {
+    padding: 0.55rem;
   }
 
   .legend,
