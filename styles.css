@@ -1094,8 +1094,16 @@ body[data-palette="forest"] .app-shell {
     justify-content: flex-end;
   }
 
+  .subtitle {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+  }
+
   .topbar p {
-    display: none;
+    display: block;
+    font-size: 0.86rem;
+    max-width: 48ch;
   }
 
   .help-panel {
@@ -1147,11 +1155,11 @@ body[data-palette="forest"] .app-shell {
   }
 
   .subtitle {
-    display: none;
+    font-size: 0.82rem;
   }
 
   .topbar p {
-    display: none;
+    font-size: 0.92rem;
   }
 
   .help-panel {
