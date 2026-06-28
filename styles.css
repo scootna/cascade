@@ -10,6 +10,120 @@
   --tile-border: #c6d6df;
   --solved: #dbf1e4;
   --unsolved: #fde9de;
+  --shell-border: #b8cad5;
+  --panel-shadow: rgba(24, 52, 73, 0.15);
+  --subtitle: #476273;
+  --control-text: #2b566c;
+  --control-accent: #2f7d6b;
+  --button-top: #2f8f7a;
+  --button-bottom: #2f7d6b;
+  --button-border: #2b6f60;
+  --button-text: #ffffff;
+  --ui-border: #c8d8df;
+  --link-stroke: #0f5e86;
+  --link-solved: #1e8b66;
+  --direction-arrow: #1e4f67;
+  --direction-sink: #2e647f;
+  --direction-sink-shadow: rgba(30, 79, 103, 0.24);
+  --current-bg: rgba(255, 255, 255, 0.92);
+  --current-border: rgba(26, 71, 94, 0.25);
+  --current-text: #143446;
+}
+
+body[data-palette="lagoon"] {
+  --bg-a: #d3eef0;
+  --bg-b: #f4f3fb;
+  --panel: #f8fbfd;
+  --ink: #1b2730;
+  --accent: #177e89;
+  --accent-soft: #8dd3d8;
+  --warn: #d86b4c;
+  --tile: #ffffff;
+  --tile-border: #b7d4dc;
+  --solved: #d7f4ef;
+  --unsolved: #fce6df;
+  --shell-border: #afcbd3;
+  --panel-shadow: rgba(18, 58, 78, 0.16);
+  --subtitle: #4d6673;
+  --control-text: #21566a;
+  --control-accent: #177e89;
+  --button-top: #1f99a6;
+  --button-bottom: #177e89;
+  --button-border: #166d76;
+  --button-text: #f8fdff;
+  --ui-border: #c7dce3;
+  --link-stroke: #126f83;
+  --link-solved: #16836f;
+  --direction-arrow: #135169;
+  --direction-sink: #1c7086;
+  --direction-sink-shadow: rgba(19, 81, 105, 0.24);
+  --current-bg: rgba(247, 253, 255, 0.94);
+  --current-border: rgba(22, 97, 125, 0.24);
+  --current-text: #10384a;
+}
+
+body[data-palette="sunset"] {
+  --bg-a: #f9dcc8;
+  --bg-b: #f5efdb;
+  --panel: #fff9f2;
+  --ink: #2e2020;
+  --accent: #ba5d43;
+  --accent-soft: #f0b59d;
+  --warn: #c96b37;
+  --tile: #fffaf6;
+  --tile-border: #e0c6b9;
+  --solved: #f5dfc9;
+  --unsolved: #fde7dd;
+  --shell-border: #d4b8a8;
+  --panel-shadow: rgba(98, 45, 28, 0.14);
+  --subtitle: #8e5d52;
+  --control-text: #8a4c41;
+  --control-accent: #ba5d43;
+  --button-top: #d37349;
+  --button-bottom: #ba5d43;
+  --button-border: #9f4d39;
+  --button-text: #fff8f4;
+  --ui-border: #e2c7b9;
+  --link-stroke: #9a513d;
+  --link-solved: #b66b3d;
+  --direction-arrow: #7f4737;
+  --direction-sink: #9a5b48;
+  --direction-sink-shadow: rgba(127, 71, 55, 0.24);
+  --current-bg: rgba(255, 247, 241, 0.94);
+  --current-border: rgba(154, 75, 53, 0.25);
+  --current-text: #5a3026;
+}
+
+body[data-palette="forest"] {
+  --bg-a: #d5e8d9;
+  --bg-b: #eef4ea;
+  --panel: #f8fbf7;
+  --ink: #1f2a24;
+  --accent: #4d7c59;
+  --accent-soft: #a5c4a1;
+  --warn: #c8754a;
+  --tile: #fbfdf9;
+  --tile-border: #bfceb8;
+  --solved: #deefe0;
+  --unsolved: #f3e8d9;
+  --shell-border: #bfd0bf;
+  --panel-shadow: rgba(35, 62, 39, 0.14);
+  --subtitle: #55705d;
+  --control-text: #3e6148;
+  --control-accent: #4d7c59;
+  --button-top: #5d8c66;
+  --button-bottom: #4d7c59;
+  --button-border: #41694a;
+  --button-text: #f7fbf6;
+  --ui-border: #d1dec9;
+  --link-stroke: #38634a;
+  --link-solved: #4d7c59;
+  --direction-arrow: #355643;
+  --direction-sink: #486d55;
+  --direction-sink-shadow: rgba(53, 86, 67, 0.24);
+  --current-bg: rgba(250, 253, 249, 0.94);
+  --current-border: rgba(69, 105, 79, 0.24);
+  --current-text: #27412f;
 }
 
 * {
@@ -39,10 +153,10 @@ body {
   height: 100%;
   margin: 0 auto;
   padding: 0.9rem;
-  border: 1px solid #b8cad5;
+  border: 1px solid var(--shell-border);
   border-radius: 18px;
   background: color-mix(in srgb, var(--panel) 88%, white 12%);
-  box-shadow: 0 16px 45px rgba(24, 52, 73, 0.15);
+  box-shadow: 0 16px 45px var(--panel-shadow);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -83,7 +197,7 @@ body {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #476273;
+  color: var(--subtitle);
 }
 
 .topbar p {
@@ -130,7 +244,7 @@ body {
   width: min(390px, 94vw);
   height: 100dvh;
   padding: 0.9rem;
-  border-left: 1px solid #aac0cb;
+  border-left: 1px solid var(--ui-border);
   background: color-mix(in srgb, var(--panel) 92%, white 8%);
   box-shadow: -16px 0 38px rgba(16, 38, 56, 0.2);
   transform: translateX(102%);
@@ -149,7 +263,7 @@ body {
   margin: -0.9rem -0.9rem 0.75rem;
   padding: 0.8rem 0.9rem;
   background: color-mix(in srgb, var(--panel) 94%, white 6%);
-  border-bottom: 1px solid #c8d8df;
+  border-bottom: 1px solid var(--ui-border);
 }
 
 .settings-header h2 {
@@ -175,12 +289,12 @@ body.difficulty-settings-open #difficultySettingsModal {
 
 .range-control span {
   font-weight: 700;
-  color: #2b566c;
+  color: var(--control-text);
 }
 
 .range-control input[type="range"] {
   width: 100%;
-  accent-color: #2f7d6b;
+  accent-color: var(--control-accent);
 }
 
 select,
@@ -195,9 +309,9 @@ button {
 
 button {
   cursor: pointer;
-  background: linear-gradient(180deg, #2f8f7a, #2f7d6b);
-  color: white;
-  border-color: #2b6f60;
+  background: linear-gradient(180deg, var(--button-top), var(--button-bottom));
+  color: var(--button-text);
+  border-color: var(--button-border);
   font-weight: 700;
 }
 
@@ -205,7 +319,7 @@ button {
 .status-row,
 .help-panel {
   margin-top: 0.9rem;
-  border: 1px solid #c8d8df;
+  border: 1px solid var(--ui-border);
   border-radius: 12px;
   background: #fff;
   padding: 0.65rem 0.85rem;
@@ -302,7 +416,7 @@ button {
 }
 
 .flow-link {
-  stroke: #0f5e86;
+  stroke: var(--link-stroke);
   stroke-width: 3.2;
   stroke-linecap: round;
   opacity: 0.95;
@@ -313,7 +427,7 @@ button {
 }
 
 .flow-link.solved {
-  stroke: #1e8b66;
+  stroke: var(--link-solved);
   opacity: 0.92;
 }
 
@@ -572,6 +686,7 @@ button {
   border-top: var(--dir-head-height, 0.36rem) solid transparent;
   border-bottom: var(--dir-head-height, 0.36rem) solid transparent;
   border-left: var(--dir-head-width, 0.72rem) solid #1e4f67;
+  border-left-color: var(--direction-arrow);
 }
 
 .board.grid-dense .direction::after {
@@ -589,8 +704,8 @@ button {
   height: 0.52rem;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  background: #2e647f;
-  box-shadow: 0 0 0 2px rgba(30, 79, 103, 0.24);
+  background: var(--direction-sink);
+  box-shadow: 0 0 0 2px var(--direction-sink-shadow);
 }
 
 .direction.sink::after {

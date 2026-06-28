@@ -14,6 +14,7 @@ const state = {
   rotationDirection: "cw",
   useRotationIcons: false,
   useFlowSound: true,
+  colorPalette: "coastal",
   allowNegativeBaseRunoff: false,
   baseTileAccumulation: 3,
   showRotatableHints: false,
@@ -49,6 +50,7 @@ const arrowScaleSliderEl = document.getElementById("arrowScaleSlider");
 const arrowScaleValueEl = document.getElementById("arrowScaleValue");
 const currentValueScaleSliderEl = document.getElementById("currentValueScaleSlider");
 const currentValueScaleValueEl = document.getElementById("currentValueScaleValue");
+const paletteSelectEl = document.getElementById("paletteSelect");
 const animationSpeedSliderEl = document.getElementById("animationSpeedSlider");
 const animationSpeedValueEl = document.getElementById("animationSpeedValue");
 const bounceStrengthSliderEl = document.getElementById("bounceStrengthSlider");
@@ -500,6 +502,13 @@ function applyFlowSoundMode() {
     : "Flow Sound: Off";
 }
 
+function applyColorPalette() {
+  document.body.dataset.palette = state.colorPalette;
+  if (paletteSelectEl) {
+    paletteSelectEl.value = state.colorPalette;
+  }
+}
+
 function applyNegativeBaseMode() {
   if (!negativeBaseToggleBtn) {
     return;
@@ -732,6 +741,13 @@ if (currentValueScaleSliderEl) {
   currentValueScaleSliderEl.addEventListener("input", () => {
     state.currentValueScale = Number(currentValueScaleSliderEl.value);
     applyCurrentValueScale();
+  });
+}
+
+if (paletteSelectEl) {
+  paletteSelectEl.addEventListener("change", () => {
+    state.colorPalette = paletteSelectEl.value;
+    applyColorPalette();
   });
 }
 
@@ -1607,6 +1623,7 @@ applyNumberMode();
 applyRotationDirection();
 applyRotationIconsMode();
 applyFlowSoundMode();
+applyColorPalette();
 applyNegativeBaseMode();
 applyBaseTileAccumulationMode();
 applyRotatableHintsMode();

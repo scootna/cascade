@@ -31,6 +31,15 @@
         <button id="displaySettingsCloseBtn" type="button">Close</button>
       </header>
       <div class="controls">
+        <label>
+          Color Palette
+          <select id="paletteSelect">
+            <option value="coastal" selected>Coastal</option>
+            <option value="lagoon">Lagoon</option>
+            <option value="sunset">Sunset</option>
+            <option value="forest">Forest</option>
+          </select>
+        </label>
         <label class="range-control" for="arrowPositionSlider">
           Arrow Position <span id="arrowPositionValue">45%</span>
           <input id="arrowPositionSlider" type="range" min="-10" max="100" step="1" value="45" />
