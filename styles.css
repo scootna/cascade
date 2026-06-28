@@ -959,7 +959,10 @@ body[data-palette="forest"] .app-shell {
   }
 
   .help-panel {
-    display: none;
+    display: block;
+    margin-top: 0.55rem;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.88rem;
   }
 
   .legend,
@@ -1004,12 +1007,12 @@ body[data-palette="forest"] .app-shell {
   }
 
   .help-panel {
-    display: none;
+    display: block;
   }
 
   .legend,
   .status-row {
-    display: none;
+    display: flex;
   }
 
   .topbar-actions {
