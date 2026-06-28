@@ -40,13 +40,16 @@ const boardStageEl = document.getElementById("boardStage");
 const linkOverlayEl = document.getElementById("linkOverlay");
 const displaySettingsToggleBtn = document.getElementById("displaySettingsToggleBtn");
 const difficultySettingsToggleBtn = document.getElementById("difficultySettingsToggleBtn");
+const shareSettingsToggleBtn = document.getElementById("shareSettingsToggleBtn");
 const lessonSettingsToggleBtn = document.getElementById("lessonSettingsToggleBtn");
 const displaySettingsCloseBtn = document.getElementById("displaySettingsCloseBtn");
 const difficultySettingsCloseBtn = document.getElementById("difficultySettingsCloseBtn");
+const shareSettingsCloseBtn = document.getElementById("shareSettingsCloseBtn");
 const lessonSettingsCloseBtn = document.getElementById("lessonSettingsCloseBtn");
 const settingsBackdropEl = document.getElementById("settingsBackdrop");
 const displaySettingsModalEl = document.getElementById("displaySettingsModal");
 const difficultySettingsModalEl = document.getElementById("difficultySettingsModal");
+const shareSettingsModalEl = document.getElementById("shareSettingsModal");
 const lessonSettingsModalEl = document.getElementById("lessonSettingsModal");
 const statusTextEl = document.getElementById("statusText");
 const movesTextEl = document.getElementById("movesText");
@@ -87,6 +90,10 @@ const rotationIconsToggleBtn = document.getElementById("rotationIconsToggleBtn")
 const flowSoundToggleBtn = document.getElementById("flowSoundToggleBtn");
 const negativeBaseToggleBtn = document.getElementById("negativeBaseToggleBtn");
 const crossingFlowToggleBtn = document.getElementById("crossingFlowToggleBtn");
+const shareBoardBtn = document.getElementById("shareBoardBtn");
+const shareBoardStatusEl = document.getElementById("shareBoardStatus");
+const shareUrlInputEl = document.getElementById("shareUrlInput");
+const shareQrImageEl = document.getElementById("shareQrImage");
 const rotatableHintsToggleBtn = document.getElementById("rotatableHintsToggleBtn");
 const sizeSelect = document.getElementById("sizeSelect");
 const baseTileAccumulationSliderEl = document.getElementById("baseTileAccumulationSlider");
@@ -209,10 +216,12 @@ const LESSON_LIBRARY = {
 function setSettingsDrawerOpen(drawerName, isOpen) {
   const displayOpen = drawerName === "display" ? isOpen : false;
   const difficultyOpen = drawerName === "difficulty" ? isOpen : false;
+  const shareOpen = drawerName === "share" ? isOpen : false;
   const lessonOpen = drawerName === "lesson" ? isOpen : false;
 
   document.body.classList.toggle("display-settings-open", displayOpen);
   document.body.classList.toggle("difficulty-settings-open", difficultyOpen);
+  document.body.classList.toggle("share-settings-open", shareOpen);
   document.body.classList.toggle("lesson-settings-open", lessonOpen);
 
   if (displaySettingsModalEl) {
@@ -221,11 +230,14 @@ function setSettingsDrawerOpen(drawerName, isOpen) {
   if (difficultySettingsModalEl) {
     difficultySettingsModalEl.setAttribute("aria-hidden", difficultyOpen ? "false" : "true");
   }
+  if (shareSettingsModalEl) {
+    shareSettingsModalEl.setAttribute("aria-hidden", shareOpen ? "false" : "true");
+  }
   if (lessonSettingsModalEl) {
     lessonSettingsModalEl.setAttribute("aria-hidden", lessonOpen ? "false" : "true");
   }
   if (settingsBackdropEl) {
-    settingsBackdropEl.setAttribute("aria-hidden", displayOpen || difficultyOpen || lessonOpen ? "false" : "true");
+    settingsBackdropEl.setAttribute("aria-hidden", displayOpen || difficultyOpen || shareOpen || lessonOpen ? "false" : "true");
   }
   if (displaySettingsToggleBtn) {
     displaySettingsToggleBtn.setAttribute("aria-expanded", displayOpen ? "true" : "false");
@@ -233,8 +245,198 @@ function setSettingsDrawerOpen(drawerName, isOpen) {
   if (difficultySettingsToggleBtn) {
     difficultySettingsToggleBtn.setAttribute("aria-expanded", difficultyOpen ? "true" : "false");
   }
+  if (shareSettingsToggleBtn) {
+    shareSettingsToggleBtn.setAttribute("aria-expanded", shareOpen ? "true" : "false");
+  }
   if (lessonSettingsToggleBtn) {
     lessonSettingsToggleBtn.setAttribute("aria-expanded", lessonOpen ? "true" : "false");
+  }
+
+  if (shareOpen) {
+    const shareUrl = buildShareUrlFromCurrentBoard();
+    if (shareUrlInputEl) {
+      shareUrlInputEl.value = shareUrl.toString();
+    }
+    if (shareQrImageEl) {
+      const qrUrl = `https://quickchart.io/qr?size=280&text=${encodeURIComponent(shareUrl.toString())}`;
+      shareQrImageEl.src = qrUrl;
+    }
+  }
+}
+
+function encodeBase64Url(input) {
+  return btoa(input)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function decodeBase64Url(input) {
+  const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
+  const padLength = (4 - (normalized.length % 4)) % 4;
+  return atob(`${normalized}${"=".repeat(padLength)}`);
+}
+
+function getDirectionCountForShape(shape) {
+  return shape === "hex" ? 6 : 8;
+}
+
+function getBoardSharePayload() {
+  return {
+    v: 1,
+    c: state.cols,
+    r: state.rows,
+    s: state.tileShape,
+    t: state.board.map((cell) => [cell.baseFlow, cell.targetAccum, cell.currentDir]),
+  };
+}
+
+function encodeBoardPayload(payload) {
+  return encodeBase64Url(JSON.stringify(payload));
+}
+
+function decodeBoardPayload(encoded) {
+  const rawJson = decodeBase64Url(encoded);
+  return JSON.parse(rawJson);
+}
+
+function loadBoardFromPayload(payload) {
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Missing payload");
+  }
+
+  const cols = Number(payload.c);
+  const rows = Number(payload.r);
+  const shape = payload.s === "hex" ? "hex" : "square";
+  const directionCount = getDirectionCountForShape(shape);
+  if (!Number.isInteger(cols) || !Number.isInteger(rows) || cols < 2 || rows < 2) {
+    throw new Error("Invalid board dimensions");
+  }
+
+  if (!Array.isArray(payload.t) || payload.t.length !== cols * rows) {
+    throw new Error("Invalid tile list");
+  }
+
+  const board = payload.t.map((tileData, index) => {
+    if (!Array.isArray(tileData) || tileData.length < 3) {
+      throw new Error(`Invalid tile at index ${index}`);
+    }
+
+    const baseFlow = Number(tileData[0]);
+    const targetAccum = Number(tileData[1]);
+    const rawDir = tileData[2];
+    const currentDir = rawDir === null ? null : Number(rawDir);
+
+    if (!Number.isFinite(baseFlow) || !Number.isFinite(targetAccum)) {
+      throw new Error(`Invalid tile values at index ${index}`);
+    }
+    if (
+      currentDir !== null
+      && (!Number.isInteger(currentDir) || currentDir < 0 || currentDir >= directionCount)
+    ) {
+      throw new Error(`Invalid tile direction at index ${index}`);
+    }
+
+    return {
+      index,
+      baseFlow,
+      targetAccum,
+      currentDir,
+      solutionDir: currentDir === null ? null : currentDir,
+      currentAccum: 0,
+    };
+  });
+
+  state.cols = cols;
+  state.rows = rows;
+  state.tileShape = shape;
+  state.board = board;
+  state.solved = false;
+  state.moves = 0;
+  state.lastCountedTileIndex = null;
+  movesTextEl.textContent = "Moves: 0";
+  resetGameTimer();
+
+  const current = accumulate(board, false);
+  for (let i = 0; i < board.length; i += 1) {
+    board[i].currentAccum = current[i];
+  }
+
+  if (sizeSelect) {
+    const rectValue = `${cols}x${rows}`;
+    const squareValue = String(cols);
+    const hasRectOption = Array.from(sizeSelect.options).some((opt) => opt.value === rectValue);
+    const hasSquareOption = cols === rows && Array.from(sizeSelect.options).some((opt) => opt.value === squareValue);
+    if (hasRectOption) {
+      sizeSelect.value = rectValue;
+    } else if (hasSquareOption) {
+      sizeSelect.value = squareValue;
+    }
+  }
+
+  applyTileShape();
+  renderBoard();
+  updateStatus();
+}
+
+function tryLoadBoardFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get("board");
+  if (!encoded) {
+    return false;
+  }
+
+  try {
+    const payload = decodeBoardPayload(encoded);
+    loadBoardFromPayload(payload);
+    if (shareBoardStatusEl) {
+      shareBoardStatusEl.textContent = "Loaded board from URL.";
+    }
+    return true;
+  } catch (error) {
+    console.warn("Failed to load board from URL parameter", error);
+    if (shareBoardStatusEl) {
+      shareBoardStatusEl.textContent = "Invalid board URL. Generated a new puzzle instead.";
+    }
+    return false;
+  }
+}
+
+function buildShareUrlFromCurrentBoard() {
+  const payload = getBoardSharePayload();
+  const encoded = encodeBoardPayload(payload);
+  const shareUrl = new URL(window.location.href);
+  shareUrl.searchParams.set("board", encoded);
+  return shareUrl;
+}
+
+async function copyBoardShareUrl() {
+  if (!state.board.length) {
+    return;
+  }
+
+  const shareUrl = buildShareUrlFromCurrentBoard();
+  window.history.replaceState({}, "", shareUrl.toString());
+  if (shareUrlInputEl) {
+    shareUrlInputEl.value = shareUrl.toString();
+  }
+  if (shareQrImageEl) {
+    const qrUrl = `https://quickchart.io/qr?size=280&text=${encodeURIComponent(shareUrl.toString())}`;
+    shareQrImageEl.src = qrUrl;
+  }
+
+  try {
+    if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
+      throw new Error("Clipboard API unavailable");
+    }
+    await navigator.clipboard.writeText(shareUrl.toString());
+    if (shareBoardStatusEl) {
+      shareBoardStatusEl.textContent = "Share URL copied to clipboard.";
+    }
+  } catch (error) {
+    if (shareBoardStatusEl) {
+      shareBoardStatusEl.textContent = "Share URL added to address bar. Copy it from there.";
+    }
   }
 }
 
@@ -1006,6 +1208,12 @@ if (crossingFlowToggleBtn) {
   });
 }
 
+if (shareBoardBtn) {
+  shareBoardBtn.addEventListener("click", () => {
+    copyBoardShareUrl();
+  });
+}
+
 if (rotatableHintsToggleBtn) {
   rotatableHintsToggleBtn.addEventListener("click", () => {
     state.showRotatableHints = !state.showRotatableHints;
@@ -1141,6 +1349,13 @@ if (difficultySettingsToggleBtn) {
   });
 }
 
+if (shareSettingsToggleBtn) {
+  shareSettingsToggleBtn.addEventListener("click", () => {
+    const shouldOpen = !document.body.classList.contains("share-settings-open");
+    setSettingsDrawerOpen("share", shouldOpen);
+  });
+}
+
 if (lessonSettingsToggleBtn) {
   lessonSettingsToggleBtn.addEventListener("click", () => {
     const shouldOpen = !document.body.classList.contains("lesson-settings-open");
@@ -1160,6 +1375,12 @@ if (difficultySettingsCloseBtn) {
   });
 }
 
+if (shareSettingsCloseBtn) {
+  shareSettingsCloseBtn.addEventListener("click", () => {
+    setSettingsDrawerOpen("share", false);
+  });
+}
+
 if (lessonSettingsCloseBtn) {
   lessonSettingsCloseBtn.addEventListener("click", () => {
     setSettingsDrawerOpen("lesson", false);
@@ -1170,6 +1391,7 @@ if (settingsBackdropEl) {
   settingsBackdropEl.addEventListener("click", () => {
     setSettingsDrawerOpen("display", false);
     setSettingsDrawerOpen("difficulty", false);
+    setSettingsDrawerOpen("share", false);
     setSettingsDrawerOpen("lesson", false);
   });
 }
@@ -1180,11 +1402,13 @@ window.addEventListener("keydown", (event) => {
     && (
       document.body.classList.contains("display-settings-open")
       || document.body.classList.contains("difficulty-settings-open")
+      || document.body.classList.contains("share-settings-open")
       || document.body.classList.contains("lesson-settings-open")
     )
   ) {
     setSettingsDrawerOpen("display", false);
     setSettingsDrawerOpen("difficulty", false);
+    setSettingsDrawerOpen("share", false);
     setSettingsDrawerOpen("lesson", false);
   }
 });
@@ -2047,7 +2271,10 @@ function renderBoard() {
   refreshHoverCursorFromPointer();
 }
 
-startNewPuzzle(state.cols, state.rows);
+const loadedBoardFromUrl = tryLoadBoardFromUrl();
+if (!loadedBoardFromUrl) {
+  startNewPuzzle(state.cols, state.rows);
+}
 applyTileShape();
 applyArrowPosition();
 applyArrowScale();

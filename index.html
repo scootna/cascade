@@ -20,6 +20,7 @@
         <button id="helpToggleBtn" type="button" aria-expanded="false" aria-controls="helpSections">Help</button>
         <button id="displaySettingsToggleBtn" type="button">Display</button>
         <button id="difficultySettingsToggleBtn" type="button">Difficulty</button>
+        <button id="shareSettingsToggleBtn" type="button">Share</button>
         <!-- <button id="lessonSettingsToggleBtn" type="button">Lessons</button> -->
         <button id="postWinNewGameBtn" type="button">New Game</button>
       </div>
@@ -103,6 +104,24 @@
         <button id="tileShapeToggleBtn" type="button">Tiles: Squares</button>
         <button id="crossingFlowToggleBtn" type="button">No Crossing Flows: Off</button>
         <button id="negativeBaseToggleBtn" type="button">Negative Base Runoff: Off</button>
+      </div>
+    </aside>
+
+    <aside id="shareSettingsModal" class="settings-modal" aria-hidden="true" aria-label="Share board">
+      <header class="settings-header">
+        <h2>Share Board</h2>
+        <button id="shareSettingsCloseBtn" type="button">Close</button>
+      </header>
+      <div class="controls share-controls">
+        <label class="share-url-field" for="shareUrlInput">
+          Share URL
+          <input id="shareUrlInput" type="text" readonly />
+        </label>
+        <button id="shareBoardBtn" type="button">Copy Share URL</button>
+        <div id="shareBoardStatus" class="share-board-status" aria-live="polite"></div>
+        <section class="share-qr-wrap" aria-label="QR code for share URL">
+          <img id="shareQrImage" alt="QR code for the current board URL" />
+        </section>
       </div>
     </aside>
 
