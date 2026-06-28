@@ -1282,6 +1282,39 @@ body[data-palette="forest"] .app-shell {
     font-size: 0.88rem;
   }
 
+  .help-sections .help-panel:not(.tutorial-panel),
+  .help-sections .legend {
+    display: none;
+  }
+
+  .tutorial-panel {
+    margin-top: 0;
+  }
+
+  .tutorial-panel h2 {
+    font-size: 0.92rem;
+  }
+
+  .tutorial-step-label {
+    font-size: 0.72rem;
+  }
+
+  .tutorial-step-text,
+  #tutorialStepText {
+    font-size: 0.82rem;
+  }
+
+  .tutorial-controls {
+    margin-top: 0.4rem;
+    gap: 0.35rem;
+  }
+
+  .tutorial-controls button {
+    flex: 1 1 8.5rem;
+    padding: 0.38rem 0.55rem;
+    font-size: 0.82rem;
+  }
+
   .legend,
   .status-row {
     padding: 0.4rem 0.55rem;
