@@ -19,6 +19,7 @@ const state = {
   lastPointerClientX: null,
   lastPointerClientY: null,
   lockedTileSize: null,
+  lastCountedTileIndex: null,
   board: [],
   moves: 0,
   solved: false,
@@ -1251,6 +1252,7 @@ function startNewPuzzle(cols, rows) {
   state.rows = rows;
   state.solved = false;
   state.moves = 0;
+  state.lastCountedTileIndex = null;
   movesTextEl.textContent = "Moves: 0";
 
   const elev = makeElevation(cols, rows);
@@ -1308,6 +1310,12 @@ function rotateCell(index, tileEl = null, rotationDirection = state.rotationDire
     return;
   }
 
+  if (state.lastCountedTileIndex !== index) {
+    state.lastCountedTileIndex = index;
+    state.moves += 1;
+    movesTextEl.textContent = `Moves: ${state.moves}`;
+  }
+
   const previousDir = cell.currentDir;
   const previousCurrentValues = state.board.map((boardCell) => boardCell.currentAccum);
   const oldDownstreamPath = collectDownstreamPath(index);
@@ -1323,8 +1331,6 @@ function rotateCell(index, tileEl = null, rotationDirection = state.rotationDire
   cell.currentDir = nextDir;
   cell.rotationFromDir = previousDir;
   cell.rotationDirectionUsed = rotationDirection;
-  state.moves += 1;
-  movesTextEl.textContent = `Moves: ${state.moves}`;
 
   const current = accumulate(state.board, false);
   for (let i = 0; i < state.board.length; i += 1) {
