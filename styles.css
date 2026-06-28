@@ -783,6 +783,47 @@ input[type="range"]:focus-visible {
   border-color: color-mix(in srgb, var(--tile-border) 66%, var(--warn) 34%);
 }
 
+.tile.sink.solved {
+  --tile-fill: color-mix(in srgb, var(--solved) calc(100% - var(--sink-tone)), var(--ink) var(--sink-tone));
+  border-color: color-mix(in srgb, var(--tile-border) 58%, var(--accent) 42%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.76),
+    inset 0 -5px 10px rgba(20, 35, 45, 0.04),
+    0 0 0 1.5px color-mix(in srgb, var(--tile-border) 54%, var(--accent) 46%);
+}
+
+.tile.sink.unsolved {
+  --tile-fill: color-mix(in srgb, var(--unsolved) calc(100% - var(--sink-tone)), var(--ink) var(--sink-tone));
+  border-color: color-mix(in srgb, var(--tile-border) 58%, var(--warn) 42%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.76),
+    inset 0 -5px 10px rgba(20, 35, 45, 0.04),
+    0 0 0 1.5px color-mix(in srgb, var(--tile-border) 54%, var(--warn) 46%);
+}
+
+.tile.sink .direction.sink::before {
+  background: color-mix(in srgb, var(--direction-sink) 84%, var(--accent-soft) 16%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--direction-sink-shadow) 82%, transparent 18%);
+}
+
+.tile.sink.solved:hover {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tile-fill) 90%, white 10%), var(--tile-fill));
+  border-color: color-mix(in srgb, var(--tile-border) 52%, var(--accent) 48%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -5px 10px rgba(20, 35, 45, 0.05),
+    0 0 0 1.5px color-mix(in srgb, var(--tile-border) 48%, var(--accent) 52%);
+}
+
+.tile.sink.unsolved:hover {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tile-fill) 90%, white 10%), var(--tile-fill));
+  border-color: color-mix(in srgb, var(--tile-border) 52%, var(--warn) 48%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -5px 10px rgba(20, 35, 45, 0.05),
+    0 0 0 1.5px color-mix(in srgb, var(--tile-border) 48%, var(--warn) 52%);
+}
+
 .tile.rotatable-hint {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 76%, white 24%), 0 0 0 5px color-mix(in srgb, var(--accent) 22%, transparent 78%);
 }
@@ -797,6 +838,42 @@ input[type="range"]:focus-visible {
 
 .board.shape-hex .tile.loop {
   box-shadow: none;
+}
+
+.board.shape-hex .tile.sink.solved {
+  --tile-fill: color-mix(in srgb, var(--solved) calc(100% - var(--sink-tone)), var(--ink) var(--sink-tone));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    inset 0 -5px 10px rgba(20, 35, 45, 0.05),
+    0 0 0 1.5px color-mix(in srgb, var(--tile-border) 54%, var(--accent) 46%);
+}
+
+.board.shape-hex .tile.sink.unsolved {
+  --tile-fill: color-mix(in srgb, var(--unsolved) calc(100% - var(--sink-tone)), var(--ink) var(--sink-tone));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.52),
+    inset 0 -5px 10px rgba(20, 35, 45, 0.05),
+    0 0 0 1.5px color-mix(in srgb, var(--tile-border) 54%, var(--warn) 46%);
+}
+
+.board.shape-hex .tile.sink::before {
+  background: var(--tile-fill);
+}
+
+.board.shape-hex .tile.sink.solved:hover {
+  background: var(--tile-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.56),
+    inset 0 -5px 10px rgba(20, 35, 45, 0.06),
+    0 0 0 1.5px color-mix(in srgb, var(--tile-border) 48%, var(--accent) 52%);
+}
+
+.board.shape-hex .tile.sink.unsolved:hover {
+  background: var(--tile-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.56),
+    inset 0 -5px 10px rgba(20, 35, 45, 0.06),
+    0 0 0 1.5px color-mix(in srgb, var(--tile-border) 48%, var(--warn) 52%);
 }
 
 .board.shape-hex .tile.rotatable-hint::after {

@@ -8,6 +8,7 @@ const state = {
   arrowPosition: 40,
   arrowScale: 2.15,
   currentValueScale: 1.4,
+  sinkTone: 7,
   animationSpeed: 220,
   bounceStrength: 2,
   tileDelay: 55,
@@ -53,6 +54,8 @@ const arrowScaleSliderEl = document.getElementById("arrowScaleSlider");
 const arrowScaleValueEl = document.getElementById("arrowScaleValue");
 const currentValueScaleSliderEl = document.getElementById("currentValueScaleSlider");
 const currentValueScaleValueEl = document.getElementById("currentValueScaleValue");
+const sinkToneSliderEl = document.getElementById("sinkToneSlider");
+const sinkToneValueEl = document.getElementById("sinkToneValue");
 const paletteSelectEl = document.getElementById("paletteSelect");
 const animationSpeedSliderEl = document.getElementById("animationSpeedSlider");
 const animationSpeedValueEl = document.getElementById("animationSpeedValue");
@@ -597,6 +600,16 @@ function applyCurrentValueScale() {
   }
 }
 
+function applySinkTone() {
+  boardEl.style.setProperty("--sink-tone", `${state.sinkTone}%`);
+  if (sinkToneValueEl) {
+    sinkToneValueEl.textContent = `${state.sinkTone}%`;
+  }
+  if (sinkToneSliderEl) {
+    sinkToneSliderEl.value = String(state.sinkTone);
+  }
+}
+
 function applyAnimationSpeed() {
   if (animationSpeedValueEl) {
     animationSpeedValueEl.textContent = `${state.animationSpeed}ms`;
@@ -758,6 +771,14 @@ if (currentValueScaleSliderEl) {
   currentValueScaleSliderEl.addEventListener("input", () => {
     state.currentValueScale = Number(currentValueScaleSliderEl.value);
     applyCurrentValueScale();
+  });
+}
+
+if (sinkToneSliderEl) {
+  sinkToneSliderEl.addEventListener("input", () => {
+    state.sinkTone = Number(sinkToneSliderEl.value);
+    applySinkTone();
+    renderBoard();
   });
 }
 
@@ -1528,6 +1549,9 @@ function renderBoard() {
     tile.type = "button";
     tile.className = "tile";
     tile.classList.add(cell.currentAccum === cell.targetAccum ? "solved" : "unsolved");
+    if (cell.currentDir === null) {
+      tile.classList.add("sink");
+    }
     if (loopTileIndices.has(cell.index)) {
       tile.classList.add("loop");
     }
@@ -1633,6 +1657,7 @@ applyTileShape();
 applyArrowPosition();
 applyArrowScale();
 applyCurrentValueScale();
+applySinkTone();
 applyAnimationSpeed();
 applyBounceStrength();
 applyTileDelay();
