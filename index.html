@@ -18,7 +18,7 @@
       </div>
       <div class="topbar-actions">
         <button id="helpToggleBtn" type="button" aria-expanded="false" aria-controls="helpSections">Help</button>
-        <button id="displaySettingsToggleBtn" type="button">Display</button>
+        <button id="displaySettingsToggleBtn" type="button">Options</button>
         <button id="difficultySettingsToggleBtn" type="button">Difficulty</button>
         <button id="shareSettingsToggleBtn" type="button">Share</button>
         <!-- <button id="lessonSettingsToggleBtn" type="button">Lessons</button> -->
@@ -30,7 +30,7 @@
 
     <aside id="displaySettingsModal" class="settings-modal" aria-hidden="true" aria-label="Display settings">
       <header class="settings-header">
-        <h2>Display Settings</h2>
+        <h2>Options</h2>
         <button id="displaySettingsCloseBtn" type="button">Close</button>
       </header>
       <div class="controls">
@@ -42,35 +42,6 @@
             <option value="sunset">Sunset</option>
             <option value="forest">Forest</option>
           </select>
-        </label>
-        <label class="range-control" for="arrowPositionSlider">
-          Arrow Position <span id="arrowPositionValue">45%</span>
-          <input id="arrowPositionSlider" type="range" min="-10" max="100" step="1" value="45" />
-        </label>
-        <label class="range-control" for="arrowScaleSlider">
-          Marker Scale <span id="arrowScaleValue">3.00x</span>
-          <input id="arrowScaleSlider" type="range" min="0.55" max="5" step="0.05" value="3" />
-        </label>
-        <label class="range-control" for="currentValueScaleSlider">
-          Current Value Scale <span id="currentValueScaleValue">1.00x</span>
-          <input id="currentValueScaleSlider" type="range" min="0.6" max="2.4" step="0.05" value="1" />
-        </label>
-        <label class="range-control" for="sinkToneSlider">
-          Terminal Tone <span id="sinkToneValue">16%</span>
-          <input id="sinkToneSlider" type="range" min="4" max="30" step="1" value="16" />
-        </label>
-
-        <label class="range-control" for="animationSpeedSlider">
-          Animation Speed <span id="animationSpeedValue">220ms</span>
-          <input id="animationSpeedSlider" type="range" min="80" max="800" step="10" value="220" />
-        </label>
-        <label class="range-control" for="bounceStrengthSlider">
-          Bounce Strength <span id="bounceStrengthValue">14%</span>
-          <input id="bounceStrengthSlider" type="range" min="0" max="35" step="1" value="14" />
-        </label>
-        <label class="range-control" for="tileDelaySlider">
-          Tile Delay <span id="tileDelayValue">55ms</span>
-          <input id="tileDelaySlider" type="range" min="0" max="240" step="5" value="55" />
         </label>
         <label>
           Flow Sound
@@ -107,6 +78,39 @@
             <option value="lines">Flow Lines</option>
           </select>
         </label>
+        <details>
+          <summary>Advanced Options</summary>
+          <div class="advanced-controls">
+            <label class="range-control" for="arrowPositionSlider">
+              Arrow Position <span id="arrowPositionValue">45%</span>
+              <input id="arrowPositionSlider" type="range" min="-10" max="100" step="1" value="45" />
+            </label>
+            <label class="range-control" for="arrowScaleSlider">
+              Marker Scale <span id="arrowScaleValue">3.00x</span>
+              <input id="arrowScaleSlider" type="range" min="0.55" max="5" step="0.05" value="3" />
+            </label>
+            <label class="range-control" for="currentValueScaleSlider">
+              Current Value Scale <span id="currentValueScaleValue">1.00x</span>
+              <input id="currentValueScaleSlider" type="range" min="0.6" max="2.4" step="0.05" value="1" />
+            </label>
+            <label class="range-control" for="sinkToneSlider">
+              Terminal Tone <span id="sinkToneValue">16%</span>
+              <input id="sinkToneSlider" type="range" min="4" max="30" step="1" value="16" />
+            </label>
+            <label class="range-control" for="animationSpeedSlider">
+              Animation Speed <span id="animationSpeedValue">220ms</span>
+              <input id="animationSpeedSlider" type="range" min="80" max="800" step="10" value="220" />
+            </label>
+            <label class="range-control" for="bounceStrengthSlider">
+              Bounce Strength <span id="bounceStrengthValue">14%</span>
+              <input id="bounceStrengthSlider" type="range" min="0" max="35" step="1" value="14" />
+            </label>
+            <label class="range-control" for="tileDelaySlider">
+              Tile Delay <span id="tileDelayValue">55ms</span>
+              <input id="tileDelaySlider" type="range" min="0" max="240" step="5" value="55" />
+            </label>
+          </div>
+        </details>
       </div>
     </aside>
 

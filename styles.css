@@ -318,6 +318,37 @@ body {
   min-width: 0;
 }
 
+.controls details {
+  border: 1px solid color-mix(in srgb, var(--ui-border) 88%, white 12%);
+  border-radius: 12px;
+  background: var(--ui-surface-soft);
+  overflow: hidden;
+}
+
+.controls details summary {
+  padding: 0.55rem 0.65rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.controls details summary::after {
+  content: " ›";
+  opacity: 0.5;
+}
+
+.controls details[open] summary::after {
+  content: " ⌄";
+}
+
+.advanced-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+  padding: 0 0.65rem 0.65rem;
+}
+
 .controls > button {
   justify-self: stretch;
 }
