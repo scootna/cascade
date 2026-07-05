@@ -916,17 +916,10 @@ input[type="range"]:focus-visible {
     0 0 0 1.5px color-mix(in srgb, var(--tile-border) 48%, var(--warn) 52%);
 }
 
-.tile.rotatable-hint {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 76%, white 24%), 0 0 0 5px color-mix(in srgb, var(--accent) 22%, transparent 78%);
-}
-
 .tile.loop {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--warn) 88%, white 12%), 0 0 0 5px color-mix(in srgb, var(--warn) 26%, transparent 74%);
 }
 
-.board.shape-hex .tile.rotatable-hint {
-  box-shadow: none;
-}
 
 .board.shape-hex .tile.loop {
   box-shadow: none;
@@ -967,17 +960,6 @@ input[type="range"]:focus-visible {
     inset 0 -5px 10px rgba(20, 35, 45, 0.06),
     0 0 0 1.5px color-mix(in srgb, var(--tile-border) 48%, var(--warn) 52%);
 }
-
-.board.shape-hex .tile.rotatable-hint::after {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  border: 2px solid rgba(17, 110, 79, 0.78);
-  pointer-events: none;
-  z-index: 1;
-}
-
 .board.shape-hex .tile.loop::after {
   content: "";
   position: absolute;
@@ -1034,18 +1016,12 @@ input[type="range"]:focus-visible {
   min-height: 2.1rem;
   padding: 0.2rem 0.46rem;
   border-radius: 999px;
-  background: var(--current-bg);
-  border: 1px solid var(--current-border);
+  background: transparent;
+  border: 1px solid transparent;
   font-size: 1.23rem;
   font-weight: 800;
   color: var(--current-text);
   z-index: 4;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-.board.hide-current-badge .current {
-  background: transparent;
-  border-color: transparent;
   text-shadow: none;
 }
 

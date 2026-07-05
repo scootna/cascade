@@ -4,7 +4,6 @@ const state = {
   tileShape: "square",
   viewMode: "arrows",
   hideBaseAndMatchedCurrent: true,
-  showCurrentValueBadge: false,
   arrowPosition: 40,
   arrowScale: 2.15,
   currentValueScale: 1.4,
@@ -22,7 +21,6 @@ const state = {
   allowNegativeBaseRunoff: false,
   disallowCrossingFlows: false,
   baseTileAccumulation: 3,
-  showRotatableHints: false,
   lastPointerClientX: null,
   lastPointerClientY: null,
   lockedTileSize: null,
@@ -71,7 +69,6 @@ const tutorialExitBtn = document.getElementById("tutorialExitBtn");
 const tutorialStepLabelEl = document.getElementById("tutorialStepLabel");
 const tutorialStepTextEl = document.getElementById("tutorialStepText");
 const rotationDirectionToggleBtn = document.getElementById("rotationDirectionToggleBtn");
-const valueBadgeSelectEl = document.getElementById("valueBadgeSelect");
 const numberModeSelectEl = document.getElementById("numberModeSelect");
 const viewSelectEl = document.getElementById("viewSelect");
 const arrowPositionSliderEl = document.getElementById("arrowPositionSlider");
@@ -107,7 +104,6 @@ const shareBoardBtn = document.getElementById("shareBoardBtn");
 const shareBoardStatusEl = document.getElementById("shareBoardStatus");
 const shareUrlInputEl = document.getElementById("shareUrlInput");
 const shareQrImageEl = document.getElementById("shareQrImage");
-const rotatableHintsSelectEl = document.getElementById("rotatableHintsSelect");
 const sizeSelect = document.getElementById("sizeSelect");
 const baseTileAccumulationSliderEl = document.getElementById("baseTileAccumulationSlider");
 const baseTileAccumulationValueEl = document.getElementById("baseTileAccumulationValue");
@@ -350,7 +346,6 @@ function persistDisplayAndDifficultySettings() {
   const payload = {
     display: {
       hideBaseAndMatchedCurrent: state.hideBaseAndMatchedCurrent,
-      showCurrentValueBadge: state.showCurrentValueBadge,
       arrowPosition: state.arrowPosition,
       arrowScale: state.arrowScale,
       currentValueScale: state.currentValueScale,
@@ -369,7 +364,6 @@ function persistDisplayAndDifficultySettings() {
       allowNegativeBaseRunoff: state.allowNegativeBaseRunoff,
       disallowCrossingFlows: state.disallowCrossingFlows,
       baseTileAccumulation: state.baseTileAccumulation,
-      showRotatableHints: state.showRotatableHints,
       gridCols: state.cols,
       gridRows: state.rows,
     },
@@ -404,9 +398,6 @@ function loadPersistedDisplayAndDifficultySettings() {
   if (display && typeof display === "object") {
     if (typeof display.hideBaseAndMatchedCurrent === "boolean") {
       state.hideBaseAndMatchedCurrent = display.hideBaseAndMatchedCurrent;
-    }
-    if (typeof display.showCurrentValueBadge === "boolean") {
-      state.showCurrentValueBadge = display.showCurrentValueBadge;
     }
     state.arrowPosition = clampNumber(Number(display.arrowPosition), 0, 100, state.arrowPosition);
     state.arrowScale = clampNumber(Number(display.arrowScale), 0.5, 4, state.arrowScale);
@@ -451,10 +442,6 @@ function loadPersistedDisplayAndDifficultySettings() {
     state.baseTileAccumulation = Math.round(
       clampNumber(Number(difficulty.baseTileAccumulation), 1, 12, state.baseTileAccumulation)
     );
-    if (typeof difficulty.showRotatableHints === "boolean") {
-      state.showRotatableHints = difficulty.showRotatableHints;
-    }
-
     const savedCols = Number(difficulty.gridCols);
     const savedRows = Number(difficulty.gridRows);
     if (
@@ -1166,12 +1153,6 @@ function applyNumberMode() {
   }
 }
 
-function applyValueBadgeMode() {
-  boardEl.classList.toggle("hide-current-badge", !state.showCurrentValueBadge);
-  if (valueBadgeSelectEl) {
-    valueBadgeSelectEl.value = state.showCurrentValueBadge ? "on" : "off";
-  }
-}
 
 function applyRotationDirection() {
   if (!rotationDirectionToggleBtn) {
@@ -1384,11 +1365,6 @@ function applyBaseTileAccumulationMode() {
   }
 }
 
-function applyRotatableHintsMode() {
-  if (rotatableHintsSelectEl) {
-    rotatableHintsSelectEl.value = state.showRotatableHints ? "on" : "off";
-  }
-}
 
 function applyTileShape() {
   boardEl.classList.toggle("shape-square", state.tileShape === "square");
@@ -1689,14 +1665,6 @@ if (boardStatusShareBtn) {
   });
 }
 
-if (rotatableHintsSelectEl) {
-  rotatableHintsSelectEl.addEventListener("change", () => {
-    state.showRotatableHints = rotatableHintsSelectEl.value === "on";
-    applyRotatableHintsMode();
-    renderBoard();
-    persistDisplayAndDifficultySettings();
-  });
-}
 
 if (tileShapeToggleBtn) {
   tileShapeToggleBtn.addEventListener("click", () => {
@@ -1716,13 +1684,6 @@ if (numberModeSelectEl) {
   });
 }
 
-if (valueBadgeSelectEl) {
-  valueBadgeSelectEl.addEventListener("change", () => {
-    state.showCurrentValueBadge = valueBadgeSelectEl.value === "on";
-    applyValueBadgeMode();
-    persistDisplayAndDifficultySettings();
-  });
-}
 
 if (arrowPositionSliderEl) {
   arrowPositionSliderEl.addEventListener("input", () => {
@@ -2719,18 +2680,6 @@ function renderBoard() {
       }
     }
 
-    if (
-      state.showRotatableHints
-      && !state.solved
-      && cell.solutionDir !== null
-      && (
-        findNextValidDirection(state.board, cell.index, cell.currentDir, null, "cw") !== cell.currentDir
-        || findNextValidDirection(state.board, cell.index, cell.currentDir, null, "ccw") !== cell.currentDir
-      )
-    ) {
-      tile.classList.add("rotatable-hint");
-    }
-
     tile.setAttribute("aria-label", `Tile ${cell.index}`);
     tile.dataset.index = String(cell.index);
 
@@ -2842,8 +2791,6 @@ applyColorPalette();
 applyNegativeBaseMode();
 applyCrossingFlowMode();
 applyBaseTileAccumulationMode();
-applyRotatableHintsMode();
-applyValueBadgeMode();
 applyViewMode();
 populateLessonSelect();
 rotateQuickCheck();
