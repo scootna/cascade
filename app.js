@@ -27,7 +27,7 @@ const state = {
   helpOpen: false,
   allowNegativeBaseRunoff: false,
   disallowCrossingFlows: false,
-  baseTileAccumulation: 3,
+  baseTileAccumulation: 1,
   lastPointerClientX: null,
   lastPointerClientY: null,
   lockedTileSize: null,
@@ -111,6 +111,7 @@ const bounceStrengthSliderEl = document.getElementById("bounceStrengthSlider");
 const bounceStrengthValueEl = document.getElementById("bounceStrengthValue");
 const tileDelaySliderEl = document.getElementById("tileDelaySlider");
 const tileDelayValueEl = document.getElementById("tileDelayValue");
+const clearSettingsBtn = document.getElementById("clearSettingsBtn");
 const tileShapeToggleBtn = document.getElementById("tileShapeToggleBtn");
 const rotationIconsToggleBtn = document.getElementById("rotationIconsToggleBtn");
 const flowSoundSelectEl = document.getElementById("flowSoundSelect");
@@ -1911,6 +1912,15 @@ if (tileDelaySliderEl) {
     state.tileDelay = Number(tileDelaySliderEl.value);
     applyTileDelay();
     persistDisplayAndDifficultySettings();
+  });
+}
+
+if (clearSettingsBtn) {
+  clearSettingsBtn.addEventListener("click", () => {
+    if (confirm("Clear all settings and reset to defaults?")) {
+      window.localStorage.removeItem(UI_SETTINGS_STORAGE_KEY);
+      window.location.reload();
+    }
   });
 }
 
