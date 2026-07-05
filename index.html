@@ -14,7 +14,6 @@
           <h1>Cascade</h1>
           <h5 class="subtitle">A Hydrology Inspired Puzzle of Cascading Sums</h5>
         </div>
-        <p>Rotate tiles to route water runoff so every tile matches its target accumulation.</p>
       </div>
       <div class="topbar-actions">
         <button id="displaySettingsToggleBtn" type="button">Options</button>
@@ -261,14 +260,8 @@
           <h2>How It Works</h2>
           <p>Each tile has a base runoff. Water follows that tile's arrow to one neighboring tile.</p>
           <p>The large center number is the base runoff plus current accumulated flow from neighboring tiles.</p>
-          <p>The bottom-right number is the target accumulated flow.</p>
-          <p>When all current values equal targets, you win.</p>
-        </section>
-
-        <section class="legend">
-          <div><span class="dot dot-solved"></span> solved tile</div>
-          <div><span class="dot dot-unsolved"></span> unsolved tile</div>
-          <div>Click any tile to rotate its outflow direction in the selected rotation mode (defaults to clockwise).<br>When tiles are in a loop, those tiles are highlighted.</div>
+          <p>The target number for a tile is the bottom-right number (hidden when tile is solved).</p>
+          <p>Click a tile to rotate its outflow direction. When all current values equal targets, you win.</p>
         </section>
 
         <section class="help-panel tutorial-panel" aria-live="polite">
