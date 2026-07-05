@@ -145,17 +145,30 @@
         <button id="difficultySettingsCloseBtn" type="button">Close</button>
       </header>
       <div class="controls">
-        <label>
-          Grid
-          <select id="sizeSelect">
-            <option value="3x3">3x3</option>
-            <option value="4x4" selected>4x4</option>
-            <option value="5">5x5</option>
-            <option value="6">6x6</option>
-            <option value="7">7x7</option>
-            <option value="8">8x8</option>
-          </select>
-        </label>
+        <div class="grid-size-controls">
+          <label>
+            Columns
+            <select id="columnCountSelect">
+              <option value="3">3</option>
+              <option value="4" selected>4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
+          </label>
+          <label>
+            Rows
+            <select id="rowCountSelect">
+              <option value="3">3</option>
+              <option value="4" selected>4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
+          </label>
+        </div>
         <label class="range-control" for="baseTileAccumulationSlider">
           Base Tile Accumulation <span id="baseTileAccumulationValue">1</span>
           <input id="baseTileAccumulationSlider" type="range" min="1" max="6" step="1" value="1" />

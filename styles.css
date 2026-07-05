@@ -302,6 +302,12 @@ body {
   gap: 0.65rem;
 }
 
+.grid-size-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
 .controls label {
   display: grid;
   gap: 0.25rem;

@@ -120,7 +120,8 @@ const shareBoardBtn = document.getElementById("shareBoardBtn");
 const shareBoardStatusEl = document.getElementById("shareBoardStatus");
 const shareUrlInputEl = document.getElementById("shareUrlInput");
 const shareQrImageEl = document.getElementById("shareQrImage");
-const sizeSelect = document.getElementById("sizeSelect");
+const rowCountSelect = document.getElementById("rowCountSelect");
+const columnCountSelect = document.getElementById("columnCountSelect");
 const baseTileAccumulationSliderEl = document.getElementById("baseTileAccumulationSlider");
 const baseTileAccumulationValueEl = document.getElementById("baseTileAccumulationValue");
 const SQUARE_DIR_DEGREES = [0, -45, -90, -135, 180, 135, 90, 45];
@@ -498,16 +499,16 @@ function loadPersistedDisplayAndDifficultySettings() {
     ) {
       state.cols = savedCols;
       state.rows = savedRows;
-      if (sizeSelect) {
-        const rectValue = `${savedCols}x${savedRows}`;
-        const squareValue = String(savedCols);
-        const hasRectOption = Array.from(sizeSelect.options).some((opt) => opt.value === rectValue);
-        const hasSquareOption = savedCols === savedRows
-          && Array.from(sizeSelect.options).some((opt) => opt.value === squareValue);
-        if (hasRectOption) {
-          sizeSelect.value = rectValue;
-        } else if (hasSquareOption) {
-          sizeSelect.value = squareValue;
+      if (rowCountSelect) {
+        const rowOption = Array.from(rowCountSelect.options).some((opt) => opt.value === String(savedRows));
+        if (rowOption) {
+          rowCountSelect.value = String(savedRows);
+        }
+      }
+      if (columnCountSelect) {
+        const colOption = Array.from(columnCountSelect.options).some((opt) => opt.value === String(savedCols));
+        if (colOption) {
+          columnCountSelect.value = String(savedCols);
         }
       }
     }
@@ -674,15 +675,16 @@ function loadBoardFromPayload(payload) {
     board[i].currentAccum = current[i];
   }
 
-  if (sizeSelect) {
-    const rectValue = `${cols}x${rows}`;
-    const squareValue = String(cols);
-    const hasRectOption = Array.from(sizeSelect.options).some((opt) => opt.value === rectValue);
-    const hasSquareOption = cols === rows && Array.from(sizeSelect.options).some((opt) => opt.value === squareValue);
-    if (hasRectOption) {
-      sizeSelect.value = rectValue;
-    } else if (hasSquareOption) {
-      sizeSelect.value = squareValue;
+  if (rowCountSelect) {
+    const rowOption = Array.from(rowCountSelect.options).some((opt) => opt.value === String(rows));
+    if (rowOption) {
+      rowCountSelect.value = String(rows);
+    }
+  }
+  if (columnCountSelect) {
+    const colOption = Array.from(columnCountSelect.options).some((opt) => opt.value === String(cols));
+    if (colOption) {
+      columnCountSelect.value = String(cols);
     }
   }
 
@@ -1313,9 +1315,9 @@ function endGuidedTutorial(restorePuzzle = true) {
   if (restorePuzzle) {
     state.helpOpen = false;
     applyHelpVisibility();
-    const selectedGrid = sizeSelect ? sizeSelect.value : "4x4";
-    const grid = parseGridValue(selectedGrid);
-    startNewPuzzle(grid.cols, grid.rows);
+    const rows = rowCountSelect ? Number(rowCountSelect.value) : 4;
+    const cols = columnCountSelect ? Number(columnCountSelect.value) : 4;
+    startNewPuzzle(cols, rows);
     return;
   }
 
@@ -1620,8 +1622,9 @@ function parseGridValue(value) {
 
 if (postWinNewGameBtn) {
   postWinNewGameBtn.addEventListener("click", () => {
-    const grid = parseGridValue(sizeSelect.value);
-    startNewPuzzle(grid.cols, grid.rows);
+    const rows = Number(rowCountSelect.value);
+    const cols = Number(columnCountSelect.value);
+    startNewPuzzle(cols, rows);
   });
 }
 
@@ -1650,13 +1653,25 @@ if (tutorialExitBtn) {
   });
 }
 
-sizeSelect.addEventListener("change", () => {
-  const grid = parseGridValue(sizeSelect.value);
-  state.cols = grid.cols;
-  state.rows = grid.rows;
+rowCountSelect.addEventListener("change", () => {
+  const rows = Number(rowCountSelect.value);
+  const cols = Number(columnCountSelect.value);
+  state.cols = cols;
+  state.rows = rows;
   persistDisplayAndDifficultySettings();
-  startNewPuzzle(grid.cols, grid.rows);
+  startNewPuzzle(cols, rows);
 });
+
+if (columnCountSelect) {
+  columnCountSelect.addEventListener("change", () => {
+    const rows = Number(rowCountSelect.value);
+    const cols = Number(columnCountSelect.value);
+    state.cols = cols;
+    state.rows = rows;
+    persistDisplayAndDifficultySettings();
+    startNewPuzzle(cols, rows);
+  });
+}
 
 if (viewSelectEl) {
   viewSelectEl.addEventListener("change", () => {
