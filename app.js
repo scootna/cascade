@@ -71,9 +71,9 @@ const tutorialExitBtn = document.getElementById("tutorialExitBtn");
 const tutorialStepLabelEl = document.getElementById("tutorialStepLabel");
 const tutorialStepTextEl = document.getElementById("tutorialStepText");
 const rotationDirectionToggleBtn = document.getElementById("rotationDirectionToggleBtn");
-const valueBadgeToggleBtn = document.getElementById("valueBadgeToggleBtn");
-const numberModeToggleBtn = document.getElementById("numberModeToggleBtn");
-const viewToggleBtn = document.getElementById("viewToggleBtn");
+const valueBadgeSelectEl = document.getElementById("valueBadgeSelect");
+const numberModeSelectEl = document.getElementById("numberModeSelect");
+const viewSelectEl = document.getElementById("viewSelect");
 const arrowPositionSliderEl = document.getElementById("arrowPositionSlider");
 const arrowPositionValueEl = document.getElementById("arrowPositionValue");
 const arrowScaleSliderEl = document.getElementById("arrowScaleSlider");
@@ -100,22 +100,19 @@ const tileDelaySliderEl = document.getElementById("tileDelaySlider");
 const tileDelayValueEl = document.getElementById("tileDelayValue");
 const tileShapeToggleBtn = document.getElementById("tileShapeToggleBtn");
 const rotationIconsToggleBtn = document.getElementById("rotationIconsToggleBtn");
-const flowSoundToggleBtn = document.getElementById("flowSoundToggleBtn");
+const flowSoundSelectEl = document.getElementById("flowSoundSelect");
 const negativeBaseToggleBtn = document.getElementById("negativeBaseToggleBtn");
 const crossingFlowToggleBtn = document.getElementById("crossingFlowToggleBtn");
 const shareBoardBtn = document.getElementById("shareBoardBtn");
 const shareBoardStatusEl = document.getElementById("shareBoardStatus");
 const shareUrlInputEl = document.getElementById("shareUrlInput");
 const shareQrImageEl = document.getElementById("shareQrImage");
-const rotatableHintsToggleBtn = document.getElementById("rotatableHintsToggleBtn");
+const rotatableHintsSelectEl = document.getElementById("rotatableHintsSelect");
 const sizeSelect = document.getElementById("sizeSelect");
 const baseTileAccumulationSliderEl = document.getElementById("baseTileAccumulationSlider");
 const baseTileAccumulationValueEl = document.getElementById("baseTileAccumulationValue");
 const SQUARE_DIR_DEGREES = [0, -45, -90, -135, 180, 135, 90, 45];
 const HEX_DIR_DEGREES = [0, -60, -120, 180, 120, 60];
-const rotationCursorEl = document.createElement("div");
-rotationCursorEl.className = "rotation-cursor";
-document.body.appendChild(rotationCursorEl);
 let flowAudioContext = null;
 let blockedSoundLastAtMs = 0;
 let lessonQuickCheckCursor = 0;
@@ -1164,22 +1161,16 @@ function buildValueUpdateDelayMap(oldPath, newPath, changedIndexes) {
 }
 
 function applyNumberMode() {
-  if (!numberModeToggleBtn) {
-    return;
+  if (numberModeSelectEl) {
+    numberModeSelectEl.value = state.hideBaseAndMatchedCurrent ? "minimal" : "standard";
   }
-  numberModeToggleBtn.textContent = state.hideBaseAndMatchedCurrent
-    ? "Number Mode: Minimal"
-    : "Number Mode: Standard";
 }
 
 function applyValueBadgeMode() {
   boardEl.classList.toggle("hide-current-badge", !state.showCurrentValueBadge);
-  if (!valueBadgeToggleBtn) {
-    return;
+  if (valueBadgeSelectEl) {
+    valueBadgeSelectEl.value = state.showCurrentValueBadge ? "on" : "off";
   }
-  valueBadgeToggleBtn.textContent = state.showCurrentValueBadge
-    ? "Value Badge: On"
-    : "Value Badge: Off";
 }
 
 function applyRotationDirection() {
@@ -1198,18 +1189,12 @@ function applyRotationIconsMode() {
       ? "Rotation Icons: On"
       : "Rotation Icons: Off";
   }
-  if (!state.useRotationIcons) {
-    hideRotationCursor();
-  }
 }
 
 function applyFlowSoundMode() {
-  if (!flowSoundToggleBtn) {
-    return;
+  if (flowSoundSelectEl) {
+    flowSoundSelectEl.value = state.useFlowSound ? "on" : "off";
   }
-  flowSoundToggleBtn.textContent = state.useFlowSound
-    ? "Flow Sound: On"
-    : "Flow Sound: Off";
 }
 
 function applyHelpVisibility() {
@@ -1400,12 +1385,9 @@ function applyBaseTileAccumulationMode() {
 }
 
 function applyRotatableHintsMode() {
-  if (!rotatableHintsToggleBtn) {
-    return;
+  if (rotatableHintsSelectEl) {
+    rotatableHintsSelectEl.value = state.showRotatableHints ? "on" : "off";
   }
-  rotatableHintsToggleBtn.textContent = state.showRotatableHints
-    ? "Rotatable Hints: On"
-    : "Rotatable Hints: Off";
 }
 
 function applyTileShape() {
@@ -1577,8 +1559,8 @@ function applyViewMode() {
   }
   boardStageEl.classList.toggle("show-arrows", state.viewMode === "arrows");
   boardStageEl.classList.toggle("show-lines", state.viewMode === "lines");
-  if (viewToggleBtn) {
-    viewToggleBtn.textContent = state.viewMode === "arrows" ? "View: Arrows" : "View: Flow Lines";
+  if (viewSelectEl) {
+    viewSelectEl.value = state.viewMode;
   }
 }
 
@@ -1640,9 +1622,9 @@ sizeSelect.addEventListener("change", () => {
   startNewPuzzle(grid.cols, grid.rows);
 });
 
-if (viewToggleBtn) {
-  viewToggleBtn.addEventListener("click", () => {
-    state.viewMode = state.viewMode === "arrows" ? "lines" : "arrows";
+if (viewSelectEl) {
+  viewSelectEl.addEventListener("change", () => {
+    state.viewMode = viewSelectEl.value;
     applyViewMode();
     persistDisplayAndDifficultySettings();
   });
@@ -1665,9 +1647,9 @@ if (rotationIconsToggleBtn) {
   });
 }
 
-if (flowSoundToggleBtn) {
-  flowSoundToggleBtn.addEventListener("click", () => {
-    state.useFlowSound = !state.useFlowSound;
+if (flowSoundSelectEl) {
+  flowSoundSelectEl.addEventListener("change", () => {
+    state.useFlowSound = flowSoundSelectEl.value === "on";
     applyFlowSoundMode();
     persistDisplayAndDifficultySettings();
   });
@@ -1707,9 +1689,9 @@ if (boardStatusShareBtn) {
   });
 }
 
-if (rotatableHintsToggleBtn) {
-  rotatableHintsToggleBtn.addEventListener("click", () => {
-    state.showRotatableHints = !state.showRotatableHints;
+if (rotatableHintsSelectEl) {
+  rotatableHintsSelectEl.addEventListener("change", () => {
+    state.showRotatableHints = rotatableHintsSelectEl.value === "on";
     applyRotatableHintsMode();
     renderBoard();
     persistDisplayAndDifficultySettings();
@@ -1725,18 +1707,18 @@ if (tileShapeToggleBtn) {
   });
 }
 
-if (numberModeToggleBtn) {
-  numberModeToggleBtn.addEventListener("click", () => {
-    state.hideBaseAndMatchedCurrent = !state.hideBaseAndMatchedCurrent;
+if (numberModeSelectEl) {
+  numberModeSelectEl.addEventListener("change", () => {
+    state.hideBaseAndMatchedCurrent = numberModeSelectEl.value === "minimal";
     applyNumberMode();
     renderBoard();
     persistDisplayAndDifficultySettings();
   });
 }
 
-if (valueBadgeToggleBtn) {
-  valueBadgeToggleBtn.addEventListener("click", () => {
-    state.showCurrentValueBadge = !state.showCurrentValueBadge;
+if (valueBadgeSelectEl) {
+  valueBadgeSelectEl.addEventListener("change", () => {
+    state.showCurrentValueBadge = valueBadgeSelectEl.value === "on";
     applyValueBadgeMode();
     persistDisplayAndDifficultySettings();
   });
@@ -2213,37 +2195,7 @@ function findNextValidDirection(
 }
 
 function getRotationDirectionFromClick(tileEl, event) {
-  if (
-    window.matchMedia("(hover: none), (pointer: coarse)").matches
-    || !tileEl
-    || !event
-    || typeof event.clientX !== "number"
-    || event.clientX <= 0
-  ) {
-    return "cw";
-  }
-
-  const rect = tileEl.getBoundingClientRect();
-  const clickX = event.clientX - rect.left;
-  return clickX < rect.width / 2 ? "ccw" : "cw";
-}
-
-function showRotationCursor(direction, clientX, clientY) {
-  if (!rotationCursorEl) {
-    return;
-  }
-  rotationCursorEl.style.left = `${clientX}px`;
-  rotationCursorEl.style.top = `${clientY}px`;
-  rotationCursorEl.classList.remove("cw", "ccw");
-  rotationCursorEl.classList.add(direction === "ccw" ? "ccw" : "cw");
-  rotationCursorEl.classList.add("active");
-}
-
-function hideRotationCursor() {
-  if (!rotationCursorEl) {
-    return;
-  }
-  rotationCursorEl.classList.remove("active", "cw", "ccw");
+  return "cw";
 }
 
 function updateTileHoverCursor(tileEl, event, canRotate) {
@@ -2255,19 +2207,11 @@ function updateTileHoverCursor(tileEl, event, canRotate) {
 
   if (!canRotate) {
     tileEl.classList.add("no-rotate");
-    hideRotationCursor();
     return;
   }
 
   tileEl.classList.remove("no-rotate");
-  const hoverDirection = getRotationDirectionFromClick(tileEl, event);
-  if (state.useRotationIcons) {
-    tileEl.classList.add(hoverDirection === "cw" ? "cursor-cw" : "cursor-ccw");
-    showRotationCursor(hoverDirection, event.clientX, event.clientY);
-  } else {
-    tileEl.classList.add(hoverDirection === "cw" ? "cursor-cw-basic" : "cursor-ccw-basic");
-    hideRotationCursor();
-  }
+  tileEl.classList.add("cursor-cw-basic");
 }
 
 function refreshHoverCursorFromPointer() {
@@ -2283,7 +2227,6 @@ function refreshHoverCursorFromPointer() {
   const hoveredEl = document.elementFromPoint(state.lastPointerClientX, state.lastPointerClientY);
   const tileEl = hoveredEl?.closest?.(".tile");
   if (!tileEl || !boardEl.contains(tileEl)) {
-    hideRotationCursor();
     return;
   }
 
@@ -2852,11 +2795,9 @@ function renderBoard() {
       if (cell.solutionDir === null) {
         tile.classList.remove("cursor-cw", "cursor-ccw", "cursor-cw-basic", "cursor-ccw-basic");
         tile.classList.add("no-rotate");
-        hideRotationCursor();
         return;
       }
       tile.classList.remove("cursor-cw", "cursor-ccw", "cursor-cw-basic", "cursor-ccw-basic", "no-rotate");
-      hideRotationCursor();
     });
     tile.addEventListener("click", (event) => {
       state.lastPointerClientX = event.clientX;
@@ -2914,7 +2855,7 @@ window.addEventListener("mousemove", (event) => {
   const hoveredEl = document.elementFromPoint(event.clientX, event.clientY);
   const tileEl = hoveredEl?.closest?.(".tile");
   if (!tileEl || !boardEl.contains(tileEl)) {
-    hideRotationCursor();
+    // no-op
   }
 });
 window.addEventListener("resize", () => {

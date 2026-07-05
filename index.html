@@ -59,7 +59,7 @@
           Terminal Tone <span id="sinkToneValue">16%</span>
           <input id="sinkToneSlider" type="range" min="4" max="30" step="1" value="16" />
         </label>
-        <button id="rotationIconsToggleBtn" type="button">Rotation Icons: Off</button>
+
         <label class="range-control" for="animationSpeedSlider">
           Animation Speed <span id="animationSpeedValue">220ms</span>
           <input id="animationSpeedSlider" type="range" min="80" max="800" step="10" value="220" />
@@ -72,11 +72,41 @@
           Tile Delay <span id="tileDelayValue">55ms</span>
           <input id="tileDelaySlider" type="range" min="0" max="240" step="5" value="55" />
         </label>
-        <button id="flowSoundToggleBtn" type="button">Flow Sound: On</button>
-        <button id="rotatableHintsToggleBtn" type="button">Rotatable Hints: Off</button>
-        <button id="valueBadgeToggleBtn" type="button">Value Badge: On</button>
-        <button id="numberModeToggleBtn" type="button">Number Mode: Standard</button>
-        <button id="viewToggleBtn" type="button">View: Arrows</button>
+        <label>
+          Flow Sound
+          <select id="flowSoundSelect">
+            <option value="on" selected>On</option>
+            <option value="off">Off</option>
+          </select>
+        </label>
+        <label>
+          Rotatable Hints
+          <select id="rotatableHintsSelect">
+            <option value="off" selected>Off</option>
+            <option value="on">On</option>
+          </select>
+        </label>
+        <label>
+          Value Badge
+          <select id="valueBadgeSelect">
+            <option value="on" selected>On</option>
+            <option value="off">Off</option>
+          </select>
+        </label>
+        <label>
+          Number Mode
+          <select id="numberModeSelect">
+            <option value="standard" selected>Standard</option>
+            <option value="minimal">Minimal</option>
+          </select>
+        </label>
+        <label>
+          View
+          <select id="viewSelect">
+            <option value="arrows" selected>Arrows</option>
+            <option value="lines">Flow Lines</option>
+          </select>
+        </label>
       </div>
     </aside>
 
