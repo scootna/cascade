@@ -18,7 +18,8 @@
       <div class="topbar-actions">
         <button id="displaySettingsToggleBtn" type="button">Options</button>
         <button id="difficultySettingsToggleBtn" type="button">Difficulty</button>
-        <button id="helpToggleBtn" type="button" aria-expanded="false" aria-controls="helpSections">Help</button>
+        <button id="helpToggleBtn" type="button" aria-expanded="false" aria-controls="helpSections">Tutorial</button>
+        <button id="aboutToggleBtn" type="button">About</button>
         <!-- <button id="shareSettingsToggleBtn" type="button">Share</button> -->
         <!-- <button id="lessonSettingsToggleBtn" type="button">Lessons</button> -->
         <!-- <button id="postWinNewGameBtn" type="button">New Game</button> -->
@@ -26,6 +27,21 @@
     </header>
 
     <div id="settingsBackdrop" class="settings-backdrop" aria-hidden="true"></div>
+
+    <aside id="aboutModal" class="settings-modal" aria-hidden="true" aria-label="About">
+      <header class="settings-header">
+        <h2>About</h2>
+        <button id="aboutCloseBtn" type="button">Close</button>
+      </header>
+      <div class="controls">
+          <h2>How It Works</h2>
+          <p>Click a tile to rotate its outflow direction. When all current values (large center numbers) equal target numbers (bottom-right numbers), you win.</p>
+          <h2>Inspiration</h2>
+          <p>Contributing Area calculations, <a href="https://hydrology.usu.edu/taudem/taudem5/help53/D8ContributingArea.html" target="_blank" rel="noopener noreferrer">D8 Contributing Area</a></p>
+          <h2>Like this puzzle?</h2>
+          <p>Share the game with others or consider donating on itch.io to support my work.</p>
+      </div>
+    </aside>
 
     <aside id="displaySettingsModal" class="settings-modal" aria-hidden="true" aria-label="Display settings">
       <header class="settings-header">
@@ -258,14 +274,6 @@
 
     <section id="helpSections" class="help-sections" hidden>
       <div class="help-card">
-        <section class="help-panel">
-          <h2>How It Works</h2>
-          <p>Each tile has a base runoff. Water follows that tile's arrow to one neighboring tile.</p>
-          <p>The large center number is the base runoff plus current accumulated flow from neighboring tiles.</p>
-          <p>The target number for a tile is the bottom-right number (hidden when tile is solved).</p>
-          <p>Click a tile to rotate its outflow direction. When all current values equal targets, you win.</p>
-        </section>
-
         <section class="help-panel tutorial-panel" aria-live="polite">
           <h2>Guided Tutorial</h2>
           <p id="tutorialStepLabel" class="tutorial-step-label">2x2 Practice</p>

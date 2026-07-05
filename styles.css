@@ -489,10 +489,15 @@ body.lesson-settings-open {
   overflow: hidden;
 }
 
+body.about-open {
+  overflow: hidden;
+}
+
 body.display-settings-open .settings-backdrop,
 body.difficulty-settings-open .settings-backdrop,
 body.share-settings-open .settings-backdrop,
-body.lesson-settings-open .settings-backdrop {
+body.lesson-settings-open .settings-backdrop,
+body.about-open .settings-backdrop {
   opacity: 1;
   pointer-events: auto;
 }
@@ -500,8 +505,23 @@ body.lesson-settings-open .settings-backdrop {
 body.display-settings-open #displaySettingsModal,
 body.difficulty-settings-open #difficultySettingsModal,
 body.share-settings-open #shareSettingsModal,
-body.lesson-settings-open #lessonSettingsModal {
+body.lesson-settings-open #lessonSettingsModal,
+body.about-open #aboutModal {
   transform: translateX(0);
+}
+
+#aboutModal .controls h2 {
+  margin: 0.5rem 0 0.15rem;
+  font-size: 1rem;
+}
+
+#aboutModal .controls h2:first-child {
+  margin-top: 0;
+}
+
+#aboutModal .controls p {
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
 }
 
 .range-control span {

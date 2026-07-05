@@ -54,15 +54,18 @@ const displaySettingsToggleBtn = document.getElementById("displaySettingsToggleB
 const difficultySettingsToggleBtn = document.getElementById("difficultySettingsToggleBtn");
 const shareSettingsToggleBtn = document.getElementById("shareSettingsToggleBtn");
 const lessonSettingsToggleBtn = document.getElementById("lessonSettingsToggleBtn");
+const aboutToggleBtn = document.getElementById("aboutToggleBtn");
 const displaySettingsCloseBtn = document.getElementById("displaySettingsCloseBtn");
 const difficultySettingsCloseBtn = document.getElementById("difficultySettingsCloseBtn");
 const shareSettingsCloseBtn = document.getElementById("shareSettingsCloseBtn");
 const lessonSettingsCloseBtn = document.getElementById("lessonSettingsCloseBtn");
+const aboutCloseBtn = document.getElementById("aboutCloseBtn");
 const settingsBackdropEl = document.getElementById("settingsBackdrop");
 const displaySettingsModalEl = document.getElementById("displaySettingsModal");
 const difficultySettingsModalEl = document.getElementById("difficultySettingsModal");
 const shareSettingsModalEl = document.getElementById("shareSettingsModal");
 const lessonSettingsModalEl = document.getElementById("lessonSettingsModal");
+const aboutModalEl = document.getElementById("aboutModal");
 const statusTextEl = document.getElementById("statusText");
 const movesTextEl = document.getElementById("movesText");
 const timerTextEl = document.getElementById("timerText");
@@ -291,6 +294,7 @@ function setSettingsDrawerOpen(drawerName, isOpen) {
   const difficultyOpen = drawerName === "difficulty" ? isOpen : false;
   const shareOpen = drawerName === "share" ? isOpen : false;
   const lessonOpen = drawerName === "lesson" ? isOpen : false;
+  const aboutOpen = drawerName === "about" ? isOpen : false;
 
   if (!shareOpen) {
     state.shareIncludeCompletedStats = false;
@@ -300,6 +304,7 @@ function setSettingsDrawerOpen(drawerName, isOpen) {
   document.body.classList.toggle("difficulty-settings-open", difficultyOpen);
   document.body.classList.toggle("share-settings-open", shareOpen);
   document.body.classList.toggle("lesson-settings-open", lessonOpen);
+  document.body.classList.toggle("about-open", aboutOpen);
 
   if (displaySettingsModalEl) {
     displaySettingsModalEl.setAttribute("aria-hidden", displayOpen ? "false" : "true");
@@ -313,8 +318,11 @@ function setSettingsDrawerOpen(drawerName, isOpen) {
   if (lessonSettingsModalEl) {
     lessonSettingsModalEl.setAttribute("aria-hidden", lessonOpen ? "false" : "true");
   }
+  if (aboutModalEl) {
+    aboutModalEl.setAttribute("aria-hidden", aboutOpen ? "false" : "true");
+  }
   if (settingsBackdropEl) {
-    settingsBackdropEl.setAttribute("aria-hidden", displayOpen || difficultyOpen || shareOpen || lessonOpen ? "false" : "true");
+    settingsBackdropEl.setAttribute("aria-hidden", displayOpen || difficultyOpen || shareOpen || lessonOpen || aboutOpen ? "false" : "true");
   }
   if (displaySettingsToggleBtn) {
     displaySettingsToggleBtn.setAttribute("aria-expanded", displayOpen ? "true" : "false");
@@ -1254,7 +1262,6 @@ function applyHelpVisibility() {
     helpSectionsEl.hidden = !state.helpOpen;
   }
   if (helpToggleBtn) {
-    helpToggleBtn.textContent = state.helpOpen ? "Hide Help" : "Help";
     helpToggleBtn.setAttribute("aria-expanded", state.helpOpen ? "true" : "false");
   }
 }
@@ -1985,6 +1992,13 @@ if (lessonSettingsToggleBtn) {
   });
 }
 
+if (aboutToggleBtn) {
+  aboutToggleBtn.addEventListener("click", () => {
+    const shouldOpen = !document.body.classList.contains("about-open");
+    setSettingsDrawerOpen("about", shouldOpen);
+  });
+}
+
 if (displaySettingsCloseBtn) {
   displaySettingsCloseBtn.addEventListener("click", () => {
     setSettingsDrawerOpen("display", false);
@@ -2009,12 +2023,19 @@ if (lessonSettingsCloseBtn) {
   });
 }
 
+if (aboutCloseBtn) {
+  aboutCloseBtn.addEventListener("click", () => {
+    setSettingsDrawerOpen("about", false);
+  });
+}
+
 if (settingsBackdropEl) {
   settingsBackdropEl.addEventListener("click", () => {
     setSettingsDrawerOpen("display", false);
     setSettingsDrawerOpen("difficulty", false);
     setSettingsDrawerOpen("share", false);
     setSettingsDrawerOpen("lesson", false);
+    setSettingsDrawerOpen("about", false);
   });
 }
 
@@ -2026,12 +2047,14 @@ window.addEventListener("keydown", (event) => {
       || document.body.classList.contains("difficulty-settings-open")
       || document.body.classList.contains("share-settings-open")
       || document.body.classList.contains("lesson-settings-open")
+      || document.body.classList.contains("about-open")
     )
   ) {
     setSettingsDrawerOpen("display", false);
     setSettingsDrawerOpen("difficulty", false);
     setSettingsDrawerOpen("share", false);
     setSettingsDrawerOpen("lesson", false);
+    setSettingsDrawerOpen("about", false);
   }
 });
 
