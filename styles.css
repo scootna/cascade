@@ -299,7 +299,7 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   align-items: end;
-  gap: 0.65rem;
+  gap: 0.01rem;
 }
 
 .grid-size-controls {

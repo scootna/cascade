@@ -70,6 +70,7 @@ const statusTextEl = document.getElementById("statusText");
 const movesTextEl = document.getElementById("movesText");
 const timerTextEl = document.getElementById("timerText");
 const benchmarkTextEl = document.getElementById("benchmarkText");
+const gamesPlayedTextEl = document.getElementById("gamesPlayedText");
 const boardStatusShareBtn = document.getElementById("boardStatusShareBtn");
 const postWinNewGameBtn = document.getElementById("postWinNewGameBtn");
 const helpToggleBtn = document.getElementById("helpToggleBtn");
@@ -522,6 +523,12 @@ function loadPersistedDisplayAndDifficultySettings() {
         }
       }
     }
+  }
+}
+
+function updateGamesPlayedDisplay() {
+  if (gamesPlayedTextEl) {
+    gamesPlayedTextEl.textContent = String(state.gamesCompleted);
   }
 }
 
@@ -2752,6 +2759,7 @@ function updateStatus() {
     stopGameTimer();
     triggerSolvedCelebration();
     state.gamesCompleted += 1;
+    updateGamesPlayedDisplay();
     persistGameStats();
   }
 
@@ -2992,6 +3000,7 @@ renderTutorialPanel();
 applyColorPalette();
 applyNegativeBaseMode();
 applyCrossingFlowMode();
+updateGamesPlayedDisplay();
 applyBaseTileAccumulationMode();
 applyViewMode();
 populateLessonSelect();

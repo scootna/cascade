@@ -39,7 +39,9 @@
           <h2>Inspiration</h2>
           <p>Contributing Area calculations, <a href="https://hydrology.usu.edu/taudem/taudem5/help53/D8ContributingArea.html" target="_blank" rel="noopener noreferrer">D8 Contributing Area</a></p>
           <h2>Like this puzzle?</h2>
-          <p>Share the game with others or consider donating on itch.io to support my work.</p>
+          <p>Share the game with others or consider donating to support <a href="https://bakajo.itch.io/cascade/donate" target="_blank" rel="noopener noreferrer">Cascade</a>.</p>
+          <h2>Number of games played</h2>
+          <p id="gamesPlayedText">0</p>
       </div>
     </aside>
 
@@ -159,6 +161,7 @@
         <h2>Difficulty Settings</h2>
         <button id="difficultySettingsCloseBtn" type="button">Close</button>
       </header>
+      <p>Larger boards are more challenging.</p>
       <div class="controls">
         <div class="grid-size-controls">
           <label>
@@ -186,10 +189,20 @@
             </select>
           </label>
         </div>
+        <p>Higher ranges are more challenging.</p>
         <label class="range-control" for="baseTileAccumulationSlider">
-          Base Tile Accumulation Value<span id="baseTileAccumulationValue">1</span>
+          Base Tile Accumulation Range<span id="baseTileAccumulationValue">1</span>
           <input id="baseTileAccumulationSlider" type="range" min="1" max="6" step="1" value="1" />
         </label>
+        <p>Negative values are more difficult.</p>
+        <label>
+          Negative Base Runoff
+          <select id="negativeBaseSelect">
+            <option value="off" selected>Off</option>
+            <option value="on">On</option>
+          </select>
+        </label>
+        <p>Hexagons area easier than squares.</p>
         <label>
           Tiles
           <select id="tileShapeSelect">
@@ -197,18 +210,12 @@
             <option value="hex">Hexagons</option>
           </select>
         </label>
+        <p>Not allowing crossing flows will make the puzzle easier (and more accurate to the real-world scenario).</p>
         <label>
           Crossing Flows
           <select id="crossingFlowSelect">
             <option value="off" selected>Allowed</option>
             <option value="on">Not Allowed</option>
-          </select>
-        </label>
-        <label>
-          Negative Base Runoff
-          <select id="negativeBaseSelect">
-            <option value="off" selected>Off</option>
-            <option value="on">On</option>
           </select>
         </label>
       </div>
