@@ -17,6 +17,13 @@ const state = {
   useRotationIcons: false,
   useFlowSound: true,
   colorPalette: "coastal",
+  customPaletteAccent: "#2f7d6b",
+  customPaletteWarn: "#d96f45",
+  customPaletteBg: "#d6e6f2",
+  customPaletteTile: "#ffffff",
+  customPaletteTileBorder: "#c6d6df",
+  customPaletteSolved: "#dbf1e4",
+  customPaletteUnsolved: "#fde9de",
   helpOpen: false,
   allowNegativeBaseRunoff: false,
   disallowCrossingFlows: false,
@@ -89,6 +96,14 @@ const lessonTeacherPromptTextEl = document.getElementById("lessonTeacherPromptTe
 const lessonReflectionTextEl = document.getElementById("lessonReflectionText");
 const lessonQuickCheckTextEl = document.getElementById("lessonQuickCheckText");
 const paletteSelectEl = document.getElementById("paletteSelect");
+const customPaletteControlsEl = document.getElementById("customPaletteControls");
+const customAccentInputEl = document.getElementById("customAccentInput");
+const customWarnInputEl = document.getElementById("customWarnInput");
+const customBgInputEl = document.getElementById("customBgInput");
+const customTileInputEl = document.getElementById("customTileInput");
+const customTileBorderInputEl = document.getElementById("customTileBorderInput");
+const customSolvedInputEl = document.getElementById("customSolvedInput");
+const customUnsolvedInputEl = document.getElementById("customUnsolvedInput");
 const animationSpeedSliderEl = document.getElementById("animationSpeedSlider");
 const animationSpeedValueEl = document.getElementById("animationSpeedValue");
 const bounceStrengthSliderEl = document.getElementById("bounceStrengthSlider");
@@ -355,6 +370,13 @@ function persistDisplayAndDifficultySettings() {
       useRotationIcons: state.useRotationIcons,
       useFlowSound: state.useFlowSound,
       colorPalette: state.colorPalette,
+      customPaletteAccent: state.customPaletteAccent,
+      customPaletteWarn: state.customPaletteWarn,
+      customPaletteBg: state.customPaletteBg,
+      customPaletteTile: state.customPaletteTile,
+      customPaletteTileBorder: state.customPaletteTileBorder,
+      customPaletteSolved: state.customPaletteSolved,
+      customPaletteUnsolved: state.customPaletteUnsolved,
       animationSpeed: state.animationSpeed,
       bounceStrength: state.bounceStrength,
       tileDelay: state.tileDelay,
@@ -429,6 +451,27 @@ function loadPersistedDisplayAndDifficultySettings() {
       if (!paletteValues || paletteValues.has(display.colorPalette)) {
         state.colorPalette = display.colorPalette;
       }
+    }
+    if (typeof display.customPaletteAccent === "string") {
+      state.customPaletteAccent = display.customPaletteAccent;
+    }
+    if (typeof display.customPaletteWarn === "string") {
+      state.customPaletteWarn = display.customPaletteWarn;
+    }
+    if (typeof display.customPaletteBg === "string") {
+      state.customPaletteBg = display.customPaletteBg;
+    }
+    if (typeof display.customPaletteTile === "string") {
+      state.customPaletteTile = display.customPaletteTile;
+    }
+    if (typeof display.customPaletteTileBorder === "string") {
+      state.customPaletteTileBorder = display.customPaletteTileBorder;
+    }
+    if (typeof display.customPaletteSolved === "string") {
+      state.customPaletteSolved = display.customPaletteSolved;
+    }
+    if (typeof display.customPaletteUnsolved === "string") {
+      state.customPaletteUnsolved = display.customPaletteUnsolved;
     }
   }
 
@@ -1336,6 +1379,34 @@ function applyColorPalette() {
   if (paletteSelectEl) {
     paletteSelectEl.value = state.colorPalette;
   }
+  const isCustom = state.colorPalette === "custom";
+  if (customPaletteControlsEl) {
+    customPaletteControlsEl.hidden = !isCustom;
+  }
+  if (isCustom) {
+    if (customAccentInputEl) customAccentInputEl.value = state.customPaletteAccent;
+    if (customWarnInputEl) customWarnInputEl.value = state.customPaletteWarn;
+    if (customBgInputEl) customBgInputEl.value = state.customPaletteBg;
+    if (customTileInputEl) customTileInputEl.value = state.customPaletteTile;
+    if (customTileBorderInputEl) customTileBorderInputEl.value = state.customPaletteTileBorder;
+    if (customSolvedInputEl) customSolvedInputEl.value = state.customPaletteSolved;
+    if (customUnsolvedInputEl) customUnsolvedInputEl.value = state.customPaletteUnsolved;
+    document.body.style.setProperty("--accent", state.customPaletteAccent);
+    document.body.style.setProperty("--warn", state.customPaletteWarn);
+    document.body.style.setProperty("--bg-a", state.customPaletteBg);
+    document.body.style.setProperty("--tile", state.customPaletteTile);
+    document.body.style.setProperty("--tile-border", state.customPaletteTileBorder);
+    document.body.style.setProperty("--solved", state.customPaletteSolved);
+    document.body.style.setProperty("--unsolved", state.customPaletteUnsolved);
+  } else {
+    document.body.style.removeProperty("--accent");
+    document.body.style.removeProperty("--warn");
+    document.body.style.removeProperty("--bg-a");
+    document.body.style.removeProperty("--tile");
+    document.body.style.removeProperty("--tile-border");
+    document.body.style.removeProperty("--solved");
+    document.body.style.removeProperty("--unsolved");
+  }
 }
 
 function applyNegativeBaseMode() {
@@ -1746,6 +1817,62 @@ if (lessonPromptBtn) {
 if (paletteSelectEl) {
   paletteSelectEl.addEventListener("change", () => {
     state.colorPalette = paletteSelectEl.value;
+    applyColorPalette();
+    persistDisplayAndDifficultySettings();
+  });
+}
+
+if (customAccentInputEl) {
+  customAccentInputEl.addEventListener("input", () => {
+    state.customPaletteAccent = customAccentInputEl.value;
+    applyColorPalette();
+    persistDisplayAndDifficultySettings();
+  });
+}
+
+if (customWarnInputEl) {
+  customWarnInputEl.addEventListener("input", () => {
+    state.customPaletteWarn = customWarnInputEl.value;
+    applyColorPalette();
+    persistDisplayAndDifficultySettings();
+  });
+}
+
+if (customBgInputEl) {
+  customBgInputEl.addEventListener("input", () => {
+    state.customPaletteBg = customBgInputEl.value;
+    applyColorPalette();
+    persistDisplayAndDifficultySettings();
+  });
+}
+
+if (customTileInputEl) {
+  customTileInputEl.addEventListener("input", () => {
+    state.customPaletteTile = customTileInputEl.value;
+    applyColorPalette();
+    persistDisplayAndDifficultySettings();
+  });
+}
+
+if (customTileBorderInputEl) {
+  customTileBorderInputEl.addEventListener("input", () => {
+    state.customPaletteTileBorder = customTileBorderInputEl.value;
+    applyColorPalette();
+    persistDisplayAndDifficultySettings();
+  });
+}
+
+if (customSolvedInputEl) {
+  customSolvedInputEl.addEventListener("input", () => {
+    state.customPaletteSolved = customSolvedInputEl.value;
+    applyColorPalette();
+    persistDisplayAndDifficultySettings();
+  });
+}
+
+if (customUnsolvedInputEl) {
+  customUnsolvedInputEl.addEventListener("input", () => {
+    state.customPaletteUnsolved = customUnsolvedInputEl.value;
     applyColorPalette();
     persistDisplayAndDifficultySettings();
   });
