@@ -44,6 +44,8 @@ const state = {
   tutorialActive: false,
   tutorialStep: 0,
   tutorialExpectedTileIndex: null,
+  preTutorialCols: null,
+  preTutorialRows: null,
   gamesCompleted: 0,
 };
 
@@ -1332,6 +1334,10 @@ function setTutorialStep(stepIndex) {
 }
 
 function startGuidedTutorial() {
+  // Save current grid size settings before starting tutorial
+  state.preTutorialCols = state.cols;
+  state.preTutorialRows = state.rows;
+
   state.tutorialActive = true;
   state.tutorialStep = 0;
   state.tutorialExpectedTileIndex = null;
@@ -1361,8 +1367,12 @@ function endGuidedTutorial(restorePuzzle = true) {
   if (restorePuzzle) {
     state.helpOpen = false;
     applyHelpVisibility();
-    const rows = rowCountSelect ? Number(rowCountSelect.value) : 4;
-    const cols = columnCountSelect ? Number(columnCountSelect.value) : 4;
+    // Restore original grid size settings from before tutorial
+    const rows = state.preTutorialRows || (rowCountSelect ? Number(rowCountSelect.value) : 4);
+    const cols = state.preTutorialCols || (columnCountSelect ? Number(columnCountSelect.value) : 4);
+    // Reset saved values
+    state.preTutorialCols = null;
+    state.preTutorialRows = null;
     startNewPuzzle(cols, rows);
     return;
   }
