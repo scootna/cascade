@@ -44,6 +44,7 @@ const state = {
   tutorialActive: false,
   tutorialStep: 0,
   tutorialExpectedTileIndex: null,
+  gamesCompleted: 0,
 };
 
 const boardEl = document.getElementById("board");
@@ -131,6 +132,7 @@ let blockedSoundLastAtMs = 0;
 let lessonQuickCheckCursor = 0;
 let gameTimerIntervalId = null;
 const UI_SETTINGS_STORAGE_KEY = "taudem.ui-settings.v1";
+const GAME_STATS_STORAGE_KEY = "taudem.game-stats.v1";
 
 const LESSON_LIBRARY = {
   k2: {
@@ -512,6 +514,36 @@ function loadPersistedDisplayAndDifficultySettings() {
         }
       }
     }
+  }
+}
+
+function persistGameStats() {
+  const payload = {
+    gamesCompleted: state.gamesCompleted,
+  };
+
+  try {
+    window.localStorage.setItem(GAME_STATS_STORAGE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    console.warn("Failed to save game stats", error);
+  }
+}
+
+function loadGameStats() {
+  let parsed;
+  try {
+    const raw = window.localStorage.getItem(GAME_STATS_STORAGE_KEY);
+    if (!raw) {
+      return;
+    }
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    console.warn("Failed to read game stats", error);
+    return;
+  }
+
+  if (typeof parsed?.gamesCompleted === "number" && parsed.gamesCompleted >= 0) {
+    state.gamesCompleted = parsed.gamesCompleted;
   }
 }
 
@@ -1909,6 +1941,7 @@ if (clearSettingsBtn) {
   clearSettingsBtn.addEventListener("click", () => {
     if (confirm("Clear all settings and reset to defaults?")) {
       window.localStorage.removeItem(UI_SETTINGS_STORAGE_KEY);
+      window.localStorage.removeItem(GAME_STATS_STORAGE_KEY);
       window.location.reload();
     }
   });
@@ -2695,6 +2728,8 @@ function updateStatus() {
   if (solvedNow && !wasSolved) {
     stopGameTimer();
     triggerSolvedCelebration();
+    state.gamesCompleted += 1;
+    persistGameStats();
   }
 
   if (solvedNow) {
@@ -2913,6 +2948,7 @@ function renderBoard() {
 }
 
 loadPersistedDisplayAndDifficultySettings();
+loadGameStats();
 const loadedBoardFromUrl = tryLoadBoardFromUrl();
 if (!loadedBoardFromUrl) {
   startNewPuzzle(state.cols, state.rows);
