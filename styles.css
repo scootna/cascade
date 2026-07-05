@@ -778,6 +778,12 @@ input[type="range"]:focus-visible {
   background: var(--unsolved);
 }
 
+.legend-items {
+  display: flex;
+  gap: 1rem;
+  margin-left: auto;
+}
+
 .board {
   --dir-scale: 1;
   --dir-forward: 34%;
