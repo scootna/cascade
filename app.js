@@ -2776,7 +2776,7 @@ function updateStatus() {
   if (solvedNow) {
     statusTextEl.textContent = `Solved in ${state.moves} moves. New Puzzle for another watershed.`;
     if (boardStatusShareBtn) {
-      boardStatusShareBtn.hidden = false;
+      boardStatusShareBtn.hidden = true;
     }
     if (postWinNewGameBtn) {
       postWinNewGameBtn.hidden = false;
