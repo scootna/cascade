@@ -76,6 +76,7 @@ const tutorialExitBtn = document.getElementById("tutorialExitBtn");
 const tutorialStepLabelEl = document.getElementById("tutorialStepLabel");
 const tutorialStepTextEl = document.getElementById("tutorialStepText");
 const rotationDirectionToggleBtn = document.getElementById("rotationDirectionToggleBtn");
+const rotationDirectionSelectEl = document.getElementById("rotationDirectionSelect");
 const numberModeSelectEl = document.getElementById("numberModeSelect");
 const viewSelectEl = document.getElementById("viewSelect");
 const arrowPositionSliderEl = document.getElementById("arrowPositionSlider");
@@ -1198,6 +1199,9 @@ function applyNumberMode() {
 
 
 function applyRotationDirection() {
+  if (rotationDirectionSelectEl) {
+    rotationDirectionSelectEl.value = state.rotationDirection;
+  }
   if (!rotationDirectionToggleBtn) {
     return;
   }
@@ -1673,6 +1677,14 @@ if (viewSelectEl) {
   viewSelectEl.addEventListener("change", () => {
     state.viewMode = viewSelectEl.value;
     applyViewMode();
+    persistDisplayAndDifficultySettings();
+  });
+}
+
+if (rotationDirectionSelectEl) {
+  rotationDirectionSelectEl.addEventListener("change", () => {
+    state.rotationDirection = rotationDirectionSelectEl.value;
+    applyRotationDirection();
     persistDisplayAndDifficultySettings();
   });
 }
@@ -2283,7 +2295,7 @@ function findNextValidDirection(
 }
 
 function getRotationDirectionFromClick(tileEl, event) {
-  return "cw";
+  return state.rotationDirection;
 }
 
 function updateTileHoverCursor(tileEl, event, canRotate) {
