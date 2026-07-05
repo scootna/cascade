@@ -112,11 +112,10 @@ const bounceStrengthValueEl = document.getElementById("bounceStrengthValue");
 const tileDelaySliderEl = document.getElementById("tileDelaySlider");
 const tileDelayValueEl = document.getElementById("tileDelayValue");
 const clearSettingsBtn = document.getElementById("clearSettingsBtn");
-const tileShapeToggleBtn = document.getElementById("tileShapeToggleBtn");
-const rotationIconsToggleBtn = document.getElementById("rotationIconsToggleBtn");
+const tileShapeSelectEl = document.getElementById("tileShapeSelect");
 const flowSoundSelectEl = document.getElementById("flowSoundSelect");
-const negativeBaseToggleBtn = document.getElementById("negativeBaseToggleBtn");
-const crossingFlowToggleBtn = document.getElementById("crossingFlowToggleBtn");
+const negativeBaseSelectEl = document.getElementById("negativeBaseSelect");
+const crossingFlowSelectEl = document.getElementById("crossingFlowSelect");
 const shareBoardBtn = document.getElementById("shareBoardBtn");
 const shareBoardStatusEl = document.getElementById("shareBoardStatus");
 const shareUrlInputEl = document.getElementById("shareUrlInput");
@@ -1212,14 +1211,6 @@ function applyRotationDirection() {
       : "Rotation: Counterclockwise";
 }
 
-function applyRotationIconsMode() {
-  if (rotationIconsToggleBtn) {
-    rotationIconsToggleBtn.textContent = state.useRotationIcons
-      ? "Rotation Icons: On"
-      : "Rotation Icons: Off";
-  }
-}
-
 function applyFlowSoundMode() {
   if (flowSoundSelectEl) {
     flowSoundSelectEl.value = state.useFlowSound ? "on" : "off";
@@ -1415,21 +1406,17 @@ function applyColorPalette() {
 }
 
 function applyNegativeBaseMode() {
-  if (!negativeBaseToggleBtn) {
+  if (!negativeBaseSelectEl) {
     return;
   }
-  negativeBaseToggleBtn.textContent = state.allowNegativeBaseRunoff
-    ? "Negative Base Runoff: On"
-    : "Negative Base Runoff: Off";
+  negativeBaseSelectEl.value = state.allowNegativeBaseRunoff ? "on" : "off";
 }
 
 function applyCrossingFlowMode() {
-  if (!crossingFlowToggleBtn) {
+  if (!crossingFlowSelectEl) {
     return;
   }
-  crossingFlowToggleBtn.textContent = state.disallowCrossingFlows
-    ? "No Crossing Flows: On"
-    : "No Crossing Flows: Off";
+  crossingFlowSelectEl.value = state.disallowCrossingFlows ? "on" : "off";
 }
 
 function applyBaseTileAccumulationMode() {
@@ -1445,11 +1432,10 @@ function applyBaseTileAccumulationMode() {
 function applyTileShape() {
   boardEl.classList.toggle("shape-square", state.tileShape === "square");
   boardEl.classList.toggle("shape-hex", state.tileShape === "hex");
-  if (!tileShapeToggleBtn) {
+  if (!tileShapeSelectEl) {
     return;
   }
-  tileShapeToggleBtn.textContent =
-    state.tileShape === "hex" ? "Tiles: Hexagons" : "Tiles: Squares";
+  tileShapeSelectEl.value = state.tileShape;
 }
 
 function applyArrowPosition() {
@@ -1698,15 +1684,6 @@ if (rotationDirectionToggleBtn) {
   });
 }
 
-if (rotationIconsToggleBtn) {
-  rotationIconsToggleBtn.addEventListener("click", () => {
-    state.useRotationIcons = !state.useRotationIcons;
-    applyRotationIconsMode();
-    renderBoard();
-    persistDisplayAndDifficultySettings();
-  });
-}
-
 if (flowSoundSelectEl) {
   flowSoundSelectEl.addEventListener("change", () => {
     state.useFlowSound = flowSoundSelectEl.value === "on";
@@ -1715,18 +1692,18 @@ if (flowSoundSelectEl) {
   });
 }
 
-if (negativeBaseToggleBtn) {
-  negativeBaseToggleBtn.addEventListener("click", () => {
-    state.allowNegativeBaseRunoff = !state.allowNegativeBaseRunoff;
+if (negativeBaseSelectEl) {
+  negativeBaseSelectEl.addEventListener("change", () => {
+    state.allowNegativeBaseRunoff = negativeBaseSelectEl.value === "on";
     applyNegativeBaseMode();
     persistDisplayAndDifficultySettings();
     startNewPuzzle(state.cols, state.rows);
   });
 }
 
-if (crossingFlowToggleBtn) {
-  crossingFlowToggleBtn.addEventListener("click", () => {
-    state.disallowCrossingFlows = !state.disallowCrossingFlows;
+if (crossingFlowSelectEl) {
+  crossingFlowSelectEl.addEventListener("change", () => {
+    state.disallowCrossingFlows = crossingFlowSelectEl.value === "on";
     applyCrossingFlowMode();
     persistDisplayAndDifficultySettings();
     startNewPuzzle(state.cols, state.rows);
@@ -1750,9 +1727,9 @@ if (boardStatusShareBtn) {
 }
 
 
-if (tileShapeToggleBtn) {
-  tileShapeToggleBtn.addEventListener("click", () => {
-    state.tileShape = state.tileShape === "square" ? "hex" : "square";
+if (tileShapeSelectEl) {
+  tileShapeSelectEl.addEventListener("change", () => {
+    state.tileShape = tileShapeSelectEl.value;
     applyTileShape();
     persistDisplayAndDifficultySettings();
     startNewPuzzle(state.cols, state.rows);
@@ -2557,6 +2534,9 @@ function startNewPuzzle(cols, rows) {
   if (boardStatusShareBtn) {
     boardStatusShareBtn.hidden = true;
   }
+  if (postWinNewGameBtn) {
+    postWinNewGameBtn.hidden = true;
+  }
   resetGameTimer();
 
   const board = [];
@@ -2709,6 +2689,9 @@ function updateStatus() {
     if (boardStatusShareBtn) {
       boardStatusShareBtn.hidden = false;
     }
+    if (postWinNewGameBtn) {
+      postWinNewGameBtn.hidden = false;
+    }
   } else {
     const remaining = state.board.filter((c) => c.currentAccum !== c.targetAccum).length;
     const crossingCount = state.disallowCrossingFlows ? getCrossingTileIndices(state.board).size : 0;
@@ -2722,12 +2705,18 @@ function updateStatus() {
     if (boardStatusShareBtn) {
       boardStatusShareBtn.hidden = true;
     }
+    if (postWinNewGameBtn) {
+      postWinNewGameBtn.hidden = true;
+    }
   }
 
   if (state.tutorialActive) {
     applyTutorialStatusMessage();
     if (boardStatusShareBtn) {
       boardStatusShareBtn.hidden = true;
+    }
+    if (postWinNewGameBtn) {
+      postWinNewGameBtn.hidden = true;
     }
   }
 
@@ -2932,7 +2921,6 @@ applyBounceStrength();
 applyTileDelay();
 applyNumberMode();
 applyRotationDirection();
-applyRotationIconsMode();
 applyFlowSoundMode();
 applyHelpVisibility();
 renderTutorialPanel();

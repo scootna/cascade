@@ -659,6 +659,11 @@ input[type="range"]:focus-visible {
   font-size: 0.8rem;
 }
 
+#postWinNewGameBtn {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+}
+
 .benchmark-text {
   color: var(--subtitle);
   font-size: 0.82rem;

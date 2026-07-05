@@ -17,12 +17,12 @@
         <p>Rotate tiles to route water runoff so every tile matches its target accumulation.</p>
       </div>
       <div class="topbar-actions">
-        <button id="helpToggleBtn" type="button" aria-expanded="false" aria-controls="helpSections">Help</button>
         <button id="displaySettingsToggleBtn" type="button">Options</button>
         <button id="difficultySettingsToggleBtn" type="button">Difficulty</button>
-        <button id="shareSettingsToggleBtn" type="button">Share</button>
+        <button id="helpToggleBtn" type="button" aria-expanded="false" aria-controls="helpSections">Help</button>
+        <!-- <button id="shareSettingsToggleBtn" type="button">Share</button> -->
         <!-- <button id="lessonSettingsToggleBtn" type="button">Lessons</button> -->
-        <button id="postWinNewGameBtn" type="button">New Game</button>
+        <!-- <button id="postWinNewGameBtn" type="button">New Game</button> -->
       </div>
     </header>
 
@@ -160,9 +160,27 @@
           Base Tile Accumulation <span id="baseTileAccumulationValue">1</span>
           <input id="baseTileAccumulationSlider" type="range" min="1" max="6" step="1" value="1" />
         </label>
-        <button id="tileShapeToggleBtn" type="button">Tiles: Squares</button>
-        <button id="crossingFlowToggleBtn" type="button">No Crossing Flows: Off</button>
-        <button id="negativeBaseToggleBtn" type="button">Negative Base Runoff: Off</button>
+        <label>
+          Tiles
+          <select id="tileShapeSelect">
+            <option value="square" selected>Squares</option>
+            <option value="hex">Hexagons</option>
+          </select>
+        </label>
+        <label>
+          Crossing Flows
+          <select id="crossingFlowSelect">
+            <option value="off" selected>Off</option>
+            <option value="on">On</option>
+          </select>
+        </label>
+        <label>
+          Negative Base Runoff
+          <select id="negativeBaseSelect">
+            <option value="off" selected>Off</option>
+            <option value="on">On</option>
+          </select>
+        </label>
       </div>
     </aside>
 
@@ -264,6 +282,7 @@
       <div id="timerText">Time: 00:00</div>
       <div id="benchmarkText" class="benchmark-text" hidden></div>
       <button id="boardStatusShareBtn" class="board-status-share" type="button" hidden>Share Result</button>
+      <button id="postWinNewGameBtn" type="button" hidden>New Game</button>
     </section>
   </main>
 
