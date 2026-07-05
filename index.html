@@ -276,14 +276,19 @@
       <section id="board" class="board" aria-label="Flow puzzle board"></section>
     </section>
 
-    <section class="status-row board-status" aria-live="polite">
-      <div id="statusText">Build all accumulations to match targets.</div>
-      <div id="movesText">Moves: 0</div>
-      <div id="timerText">Time: 00:00</div>
-      <div id="benchmarkText" class="benchmark-text" hidden></div>
-      <button id="boardStatusShareBtn" class="board-status-share" type="button" hidden>Share Result</button>
-      <button id="postWinNewGameBtn" type="button" hidden>New Game</button>
-    </section>
+    <div class="status-actions-row">
+      <section class="status-row board-status" aria-live="polite">
+        <div id="statusText"></div>
+        <div id="movesText">Moves: 0</div>
+        <div id="timerText">Time: 00:00</div>
+        <div id="benchmarkText" class="benchmark-text"></div>
+      </section>
+
+      <div class="board-actions">
+        <button id="boardStatusShareBtn" type="button" hidden>Share Result</button>
+        <button id="postWinNewGameBtn" type="button" hidden>New Game</button>
+      </div>
+    </div>
   </main>
 
   <script src="app.js"></script>

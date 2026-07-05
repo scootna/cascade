@@ -653,8 +653,23 @@ input[type="range"]:focus-visible {
   margin-top: 0.1rem;
 }
 
+.status-actions-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-top: 0.1rem;
+}
+
+.status-actions-row .board-status {
+  flex: 1;
+  margin-top: 0;
+}
+
+.status-actions-row .board-actions {
+  margin-top: 0;
+}
+
 .board-status-share {
-  margin-left: auto;
   padding: 0.35rem 0.6rem;
   font-size: 0.8rem;
 }
@@ -664,9 +679,16 @@ input[type="range"]:focus-visible {
   font-size: 0.8rem;
 }
 
+.board-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 .benchmark-text {
   color: var(--subtitle);
   font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .lesson-studio {

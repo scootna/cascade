@@ -577,14 +577,12 @@ function renderBenchmarkComparison() {
   const hasBenchmarks = !!state.loadedBenchmarkStats
     && (state.loadedBenchmarkStats.m > 0 || state.loadedBenchmarkStats.t > 0);
   if (!hasBenchmarks) {
-    benchmarkTextEl.hidden = true;
     benchmarkTextEl.textContent = "";
     return;
   }
   const moveDelta = state.moves - state.loadedBenchmarkStats.m;
   const timeDelta = state.timerElapsedMs - state.loadedBenchmarkStats.t;
-  benchmarkTextEl.hidden = false;
-  benchmarkTextEl.textContent = `Benchmark: ${state.loadedBenchmarkStats.m} moves, ${formatTimer(state.loadedBenchmarkStats.t)}. Current: ${state.moves} moves, ${formatTimer(state.timerElapsedMs)}. Delta: ${formatSignedMoveDelta(moveDelta)}, ${formatSignedTimeDelta(timeDelta)}.`;
+  benchmarkTextEl.innerHTML = `(<strong>Moves:</strong> ${state.loadedBenchmarkStats.m}   <strong>Time: </strong> ${formatTimer(state.loadedBenchmarkStats.t)})`;
 }
 
 function getDirectionCountForShape(shape) {
@@ -2685,7 +2683,7 @@ function updateStatus() {
   }
 
   if (solvedNow) {
-    statusTextEl.textContent = `Solved in ${state.moves} moves. New Puzzle for another watershed.${formatBenchmarkComparison()}`;
+    statusTextEl.textContent = `Solved in ${state.moves} moves. New Puzzle for another watershed.`;
     if (boardStatusShareBtn) {
       boardStatusShareBtn.hidden = false;
     }
@@ -2695,13 +2693,6 @@ function updateStatus() {
   } else {
     const remaining = state.board.filter((c) => c.currentAccum !== c.targetAccum).length;
     const crossingCount = state.disallowCrossingFlows ? getCrossingTileIndices(state.board).size : 0;
-    if (remaining === 0 && crossingCount > 0) {
-      statusTextEl.textContent = `Crossing flows detected on ${crossingCount} tiles. Remove crossings to finish.`;
-    } else if (crossingCount > 0) {
-      statusTextEl.textContent = `${remaining} tiles mismatched and crossing flows detected.`;
-    } else {
-      statusTextEl.textContent = `${remaining} tiles still mismatched.`;
-    }
     if (boardStatusShareBtn) {
       boardStatusShareBtn.hidden = true;
     }
