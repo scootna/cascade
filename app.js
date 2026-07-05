@@ -2736,7 +2736,7 @@ function renderBoard() {
 
     const base = document.createElement("span");
     base.className = "base";
-    base.textContent = `b:${cell.baseFlow}`;
+    base.textContent = `${cell.baseFlow}`;
     if (state.hideBaseAndMatchedCurrent) {
       base.style.display = "none";
     }
