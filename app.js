@@ -120,6 +120,7 @@ let flowAudioContext = null;
 let blockedSoundLastAtMs = 0;
 let lessonQuickCheckCursor = 0;
 let gameTimerIntervalId = null;
+const UI_SETTINGS_STORAGE_KEY = "taudem.ui-settings.v1";
 
 const LESSON_LIBRARY = {
   k2: {
@@ -339,6 +340,150 @@ function decodeBase64Url(input) {
   const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
   const padLength = (4 - (normalized.length % 4)) % 4;
   return atob(`${normalized}${"=".repeat(padLength)}`);
+}
+
+function clampNumber(value, min, max, fallback) {
+  if (!Number.isFinite(value)) {
+    return fallback;
+  }
+  return Math.min(max, Math.max(min, value));
+}
+
+function persistDisplayAndDifficultySettings() {
+  const payload = {
+    display: {
+      hideBaseAndMatchedCurrent: state.hideBaseAndMatchedCurrent,
+      showCurrentValueBadge: state.showCurrentValueBadge,
+      arrowPosition: state.arrowPosition,
+      arrowScale: state.arrowScale,
+      currentValueScale: state.currentValueScale,
+      sinkTone: state.sinkTone,
+      viewMode: state.viewMode,
+      rotationDirection: state.rotationDirection,
+      useRotationIcons: state.useRotationIcons,
+      useFlowSound: state.useFlowSound,
+      colorPalette: state.colorPalette,
+      animationSpeed: state.animationSpeed,
+      bounceStrength: state.bounceStrength,
+      tileDelay: state.tileDelay,
+      tileShape: state.tileShape,
+    },
+    difficulty: {
+      allowNegativeBaseRunoff: state.allowNegativeBaseRunoff,
+      disallowCrossingFlows: state.disallowCrossingFlows,
+      baseTileAccumulation: state.baseTileAccumulation,
+      showRotatableHints: state.showRotatableHints,
+      gridCols: state.cols,
+      gridRows: state.rows,
+    },
+  };
+
+  try {
+    window.localStorage.setItem(UI_SETTINGS_STORAGE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    console.warn("Failed to save UI settings", error);
+  }
+}
+
+function loadPersistedDisplayAndDifficultySettings() {
+  let parsed;
+  try {
+    const raw = window.localStorage.getItem(UI_SETTINGS_STORAGE_KEY);
+    if (!raw) {
+      return;
+    }
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    console.warn("Failed to read UI settings", error);
+    return;
+  }
+
+  const display = parsed?.display;
+  const difficulty = parsed?.difficulty;
+  if (!display && !difficulty) {
+    return;
+  }
+
+  if (display && typeof display === "object") {
+    if (typeof display.hideBaseAndMatchedCurrent === "boolean") {
+      state.hideBaseAndMatchedCurrent = display.hideBaseAndMatchedCurrent;
+    }
+    if (typeof display.showCurrentValueBadge === "boolean") {
+      state.showCurrentValueBadge = display.showCurrentValueBadge;
+    }
+    state.arrowPosition = clampNumber(Number(display.arrowPosition), 0, 100, state.arrowPosition);
+    state.arrowScale = clampNumber(Number(display.arrowScale), 0.5, 4, state.arrowScale);
+    state.currentValueScale = clampNumber(Number(display.currentValueScale), 0.5, 3, state.currentValueScale);
+    state.sinkTone = clampNumber(Number(display.sinkTone), 0, 100, state.sinkTone);
+    state.animationSpeed = clampNumber(Number(display.animationSpeed), 80, 1200, state.animationSpeed);
+    state.bounceStrength = clampNumber(Number(display.bounceStrength), 0, 100, state.bounceStrength);
+    state.tileDelay = clampNumber(Number(display.tileDelay), 0, 800, state.tileDelay);
+
+    if (display.viewMode === "arrows" || display.viewMode === "lines") {
+      state.viewMode = display.viewMode;
+    }
+    if (display.rotationDirection === "cw" || display.rotationDirection === "ccw") {
+      state.rotationDirection = display.rotationDirection;
+    }
+    if (typeof display.useRotationIcons === "boolean") {
+      state.useRotationIcons = display.useRotationIcons;
+    }
+    if (typeof display.useFlowSound === "boolean") {
+      state.useFlowSound = display.useFlowSound;
+    }
+    if (display.tileShape === "square" || display.tileShape === "hex") {
+      state.tileShape = display.tileShape;
+    }
+    if (typeof display.colorPalette === "string") {
+      const paletteValues = paletteSelectEl
+        ? new Set(Array.from(paletteSelectEl.options).map((option) => option.value))
+        : null;
+      if (!paletteValues || paletteValues.has(display.colorPalette)) {
+        state.colorPalette = display.colorPalette;
+      }
+    }
+  }
+
+  if (difficulty && typeof difficulty === "object") {
+    if (typeof difficulty.allowNegativeBaseRunoff === "boolean") {
+      state.allowNegativeBaseRunoff = difficulty.allowNegativeBaseRunoff;
+    }
+    if (typeof difficulty.disallowCrossingFlows === "boolean") {
+      state.disallowCrossingFlows = difficulty.disallowCrossingFlows;
+    }
+    state.baseTileAccumulation = Math.round(
+      clampNumber(Number(difficulty.baseTileAccumulation), 1, 12, state.baseTileAccumulation)
+    );
+    if (typeof difficulty.showRotatableHints === "boolean") {
+      state.showRotatableHints = difficulty.showRotatableHints;
+    }
+
+    const savedCols = Number(difficulty.gridCols);
+    const savedRows = Number(difficulty.gridRows);
+    if (
+      Number.isInteger(savedCols)
+      && Number.isInteger(savedRows)
+      && savedCols >= 2
+      && savedRows >= 2
+      && savedCols <= 24
+      && savedRows <= 24
+    ) {
+      state.cols = savedCols;
+      state.rows = savedRows;
+      if (sizeSelect) {
+        const rectValue = `${savedCols}x${savedRows}`;
+        const squareValue = String(savedCols);
+        const hasRectOption = Array.from(sizeSelect.options).some((opt) => opt.value === rectValue);
+        const hasSquareOption = savedCols === savedRows
+          && Array.from(sizeSelect.options).some((opt) => opt.value === squareValue);
+        if (hasRectOption) {
+          sizeSelect.value = rectValue;
+        } else if (hasSquareOption) {
+          sizeSelect.value = squareValue;
+        }
+      }
+    }
+  }
 }
 
 function getCompletedStatsPayload() {
@@ -1489,6 +1634,9 @@ if (tutorialExitBtn) {
 
 sizeSelect.addEventListener("change", () => {
   const grid = parseGridValue(sizeSelect.value);
+  state.cols = grid.cols;
+  state.rows = grid.rows;
+  persistDisplayAndDifficultySettings();
   startNewPuzzle(grid.cols, grid.rows);
 });
 
@@ -1496,6 +1644,7 @@ if (viewToggleBtn) {
   viewToggleBtn.addEventListener("click", () => {
     state.viewMode = state.viewMode === "arrows" ? "lines" : "arrows";
     applyViewMode();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1503,6 +1652,7 @@ if (rotationDirectionToggleBtn) {
   rotationDirectionToggleBtn.addEventListener("click", () => {
     state.rotationDirection = state.rotationDirection === "cw" ? "ccw" : "cw";
     applyRotationDirection();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1511,6 +1661,7 @@ if (rotationIconsToggleBtn) {
     state.useRotationIcons = !state.useRotationIcons;
     applyRotationIconsMode();
     renderBoard();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1518,6 +1669,7 @@ if (flowSoundToggleBtn) {
   flowSoundToggleBtn.addEventListener("click", () => {
     state.useFlowSound = !state.useFlowSound;
     applyFlowSoundMode();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1525,6 +1677,7 @@ if (negativeBaseToggleBtn) {
   negativeBaseToggleBtn.addEventListener("click", () => {
     state.allowNegativeBaseRunoff = !state.allowNegativeBaseRunoff;
     applyNegativeBaseMode();
+    persistDisplayAndDifficultySettings();
     startNewPuzzle(state.cols, state.rows);
   });
 }
@@ -1533,6 +1686,7 @@ if (crossingFlowToggleBtn) {
   crossingFlowToggleBtn.addEventListener("click", () => {
     state.disallowCrossingFlows = !state.disallowCrossingFlows;
     applyCrossingFlowMode();
+    persistDisplayAndDifficultySettings();
     startNewPuzzle(state.cols, state.rows);
   });
 }
@@ -1558,6 +1712,7 @@ if (rotatableHintsToggleBtn) {
     state.showRotatableHints = !state.showRotatableHints;
     applyRotatableHintsMode();
     renderBoard();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1565,6 +1720,7 @@ if (tileShapeToggleBtn) {
   tileShapeToggleBtn.addEventListener("click", () => {
     state.tileShape = state.tileShape === "square" ? "hex" : "square";
     applyTileShape();
+    persistDisplayAndDifficultySettings();
     startNewPuzzle(state.cols, state.rows);
   });
 }
@@ -1574,6 +1730,7 @@ if (numberModeToggleBtn) {
     state.hideBaseAndMatchedCurrent = !state.hideBaseAndMatchedCurrent;
     applyNumberMode();
     renderBoard();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1581,6 +1738,7 @@ if (valueBadgeToggleBtn) {
   valueBadgeToggleBtn.addEventListener("click", () => {
     state.showCurrentValueBadge = !state.showCurrentValueBadge;
     applyValueBadgeMode();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1588,6 +1746,7 @@ if (arrowPositionSliderEl) {
   arrowPositionSliderEl.addEventListener("input", () => {
     state.arrowPosition = Number(arrowPositionSliderEl.value);
     applyArrowPosition();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1595,6 +1754,7 @@ if (arrowScaleSliderEl) {
   arrowScaleSliderEl.addEventListener("input", () => {
     state.arrowScale = Number(arrowScaleSliderEl.value);
     applyArrowScale();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1602,6 +1762,7 @@ if (currentValueScaleSliderEl) {
   currentValueScaleSliderEl.addEventListener("input", () => {
     state.currentValueScale = Number(currentValueScaleSliderEl.value);
     applyCurrentValueScale();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1610,6 +1771,7 @@ if (sinkToneSliderEl) {
     state.sinkTone = Number(sinkToneSliderEl.value);
     applySinkTone();
     renderBoard();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1642,6 +1804,7 @@ if (paletteSelectEl) {
   paletteSelectEl.addEventListener("change", () => {
     state.colorPalette = paletteSelectEl.value;
     applyColorPalette();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1649,6 +1812,7 @@ if (animationSpeedSliderEl) {
   animationSpeedSliderEl.addEventListener("input", () => {
     state.animationSpeed = Number(animationSpeedSliderEl.value);
     applyAnimationSpeed();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1656,6 +1820,7 @@ if (bounceStrengthSliderEl) {
   bounceStrengthSliderEl.addEventListener("input", () => {
     state.bounceStrength = Number(bounceStrengthSliderEl.value);
     applyBounceStrength();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1663,6 +1828,7 @@ if (tileDelaySliderEl) {
   tileDelaySliderEl.addEventListener("input", () => {
     state.tileDelay = Number(tileDelaySliderEl.value);
     applyTileDelay();
+    persistDisplayAndDifficultySettings();
   });
 }
 
@@ -1670,6 +1836,7 @@ if (baseTileAccumulationSliderEl) {
   baseTileAccumulationSliderEl.addEventListener("input", () => {
     state.baseTileAccumulation = Number(baseTileAccumulationSliderEl.value);
     applyBaseTileAccumulationMode();
+    persistDisplayAndDifficultySettings();
     startNewPuzzle(state.cols, state.rows);
   });
 }
@@ -2246,6 +2413,48 @@ function accumulate(board, useSolution) {
   return result;
 }
 
+function accumulateExcludingLoopContributors(board, loopTileIndices) {
+  const n = board.length;
+  const incoming = Array.from({ length: n }, () => []);
+
+  for (let i = 0; i < n; i += 1) {
+    const to = followDirection(state.cols, state.rows, i, board[i].currentDir);
+    if (to !== i) {
+      incoming[to].push(i);
+    }
+  }
+
+  const memo = new Array(n).fill(null);
+  const visiting = new Set();
+
+  function dfs(i) {
+    if (memo[i] !== null) {
+      return memo[i];
+    }
+    if (visiting.has(i)) {
+      return board[i].baseFlow;
+    }
+
+    visiting.add(i);
+    let sum = board[i].baseFlow;
+    for (const up of incoming[i]) {
+      if (loopTileIndices.has(up)) {
+        continue;
+      }
+      sum += dfs(up);
+    }
+    visiting.delete(i);
+    memo[i] = sum;
+    return sum;
+  }
+
+  const result = new Array(n).fill(0);
+  for (let i = 0; i < n; i += 1) {
+    result[i] = dfs(i);
+  }
+  return result;
+}
+
 function scrambleDirections(board) {
   const order = board.map((cell) => cell.index);
   for (let i = order.length - 1; i > 0; i -= 1) {
@@ -2522,7 +2731,9 @@ function renderBoard() {
 
   applyArrowScale();
 
-  const highlightedInvalidTiles = getLoopTileIndices(state.board);
+  const loopTileIndices = getLoopTileIndices(state.board);
+  const loopDisplayValues = accumulateExcludingLoopContributors(state.board, loopTileIndices);
+  const highlightedInvalidTiles = new Set(loopTileIndices);
   if (state.disallowCrossingFlows) {
     const crossingTiles = getCrossingTileIndices(state.board);
     for (const index of crossingTiles) {
@@ -2589,7 +2800,10 @@ function renderBoard() {
 
     const current = document.createElement("span");
     current.className = "current";
-    current.textContent = String(cell.currentAccum);
+    const displayedCurrentValue = loopTileIndices.has(cell.index)
+      ? loopDisplayValues[cell.index]
+      : cell.currentAccum;
+    current.textContent = String(displayedCurrentValue);
     if (cell.shouldAnimateValue) {
       animateCurrentValueUpdate(current, cell.valueUpdateDelay ?? 0);
       delete cell.shouldAnimateValue;
@@ -2664,6 +2878,7 @@ function renderBoard() {
   refreshHoverCursorFromPointer();
 }
 
+loadPersistedDisplayAndDifficultySettings();
 const loadedBoardFromUrl = tryLoadBoardFromUrl();
 if (!loadedBoardFromUrl) {
   startNewPuzzle(state.cols, state.rows);
